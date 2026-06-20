@@ -16,6 +16,14 @@ type Expense = {
     amount: string;
     status: string;
     payer?: User;
+    payments?: Array<{
+        id: string;
+        amount: string;
+        status: string;
+        payment_method: string | null;
+        rejection_reason: string | null;
+        user: User;
+    }>;
 };
 
 type Group = {
@@ -127,6 +135,44 @@ function submitExpense() {
                         <p class="mt-1 text-sm text-black/60">
                             {{ expense.status }} oleh {{ expense.payer?.name ?? 'admin' }}
                         </p>
+                        <div
+                            v-if="isAdmin && expense.payments?.length"
+                            class="mt-4 grid gap-2"
+                        >
+                            <div
+                                v-for="payment in expense.payments"
+                                :key="payment.id"
+                                class="rounded-xl bg-white p-3 text-sm"
+                            >
+                                <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                                    <p class="text-black/70">
+                                        {{ payment.user.name }} · Rp {{ payment.amount }} ·
+                                        {{ payment.status }}
+                                    </p>
+                                    <div
+                                        v-if="payment.status === 'submitted'"
+                                        class="flex gap-2"
+                                    >
+                                        <Link
+                                            :href="`/payments/${payment.id}/confirm`"
+                                            as="button"
+                                            class="rounded-full bg-black px-3 py-1 font-semibold text-white"
+                                            method="patch"
+                                        >
+                                            Confirm
+                                        </Link>
+                                        <Link
+                                            :href="`/payments/${payment.id}/reject`"
+                                            as="button"
+                                            class="rounded-full border border-black px-3 py-1 font-semibold text-black"
+                                            method="patch"
+                                        >
+                                            Reject
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </li>
                 </ul>
                 <p v-else class="mt-4 text-black/60">

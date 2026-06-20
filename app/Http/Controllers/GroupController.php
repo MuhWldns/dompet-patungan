@@ -47,7 +47,11 @@ class GroupController extends Controller
     {
         abort_unless($this->isMember($request, $group), 403);
 
-        $group->load(['members:id,name,email', 'expenses.payer:id,name']);
+        $group->load([
+            'members:id,name,email',
+            'expenses.payer:id,name',
+            'expenses.payments.user:id,name',
+        ]);
 
         return Inertia::render('groups/Show', [
             'group' => $group,

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\GroupExpenseController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
@@ -14,6 +15,11 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::post('groups/{group}/expenses', [GroupExpenseController::class, 'store'])->name('groups.expenses.store');
     Route::post('groups/{group}/join/{token}', [GroupController::class, 'join'])->name('groups.join');
     Route::get('groups/{group}', [GroupController::class, 'show'])->name('groups.show');
+
+    Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
+    Route::post('payments/{payment}/pay', [PaymentController::class, 'pay'])->name('payments.pay');
+    Route::patch('payments/{payment}/confirm', [PaymentController::class, 'confirm'])->name('payments.confirm');
+    Route::patch('payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
 });
 
 Route::middleware(['auth', 'active', 'system.admin'])
