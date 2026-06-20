@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build the `Docs/ABOUT_PROJECT.md` product as a Laravel + Vue/Inertia app with MySQL runtime defaults and SQLite automated tests.
+**Goal:** Build the `Docs/ABOUT_PROJECT.md` product as a Laravel + Vue/Inertia app with MySQL runtime and MySQL automated tests.
 
 **Architecture:** Keep normal runtime as Laravel web routes returning Inertia pages. Build in vertical slices: schema/domain, access control, groups, expenses/splits, payments/uploads, settlements, notifications, system admin, and dashboard/UI polish.
 
-**Tech Stack:** Laravel 13, Fortify, Inertia v3, Vue 3, Tailwind CSS v4, Wayfinder, Pest 4, Larastan, MySQL runtime, SQLite tests.
+**Tech Stack:** Laravel 13, Fortify, Inertia v3, Vue 3, Tailwind CSS v4, Wayfinder, Pest 4, Larastan, MySQL runtime, MySQL tests.
 
 ---
 
@@ -47,11 +47,11 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-- [ ] **Step 2: Confirm tests still use SQLite**
+- [ ] **Step 2: Confirm tests use MySQL test database**
 
 Run: `php artisan test --filter=ExampleTest`
 
-Expected: PASS; `phpunit.xml` still contains `DB_CONNECTION=sqlite` and `DB_DATABASE=:memory:`.
+Expected: PASS; `phpunit.xml` contains `DB_CONNECTION=mysql` and `DB_DATABASE=dompet_patungan_test`.
 
 - [ ] **Step 3: Commit**
 

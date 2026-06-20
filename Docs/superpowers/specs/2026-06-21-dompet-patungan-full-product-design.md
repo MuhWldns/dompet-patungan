@@ -2,7 +2,7 @@
 
 ## Goal
 
-Implement the functional scope in `Docs/ABOUT_PROJECT.md` as a full Laravel + Vue/Inertia product pass, using MySQL as the default runtime database and keeping automated tests on SQLite.
+Implement the functional scope in `Docs/ABOUT_PROJECT.md` as a full Laravel + Vue/Inertia product pass, using MySQL for both runtime and automated tests.
 
 ## Approach
 
@@ -12,7 +12,7 @@ Build the product in thin vertical slices instead of one large unverified change
 
 - Keep the app as Laravel web routes returning Inertia pages; do not introduce Vue Router or a separate JSON API for normal page loading.
 - Use MySQL as the default local/runtime database in `.env.example`.
-- Keep `phpunit.xml` on in-memory SQLite for automated tests.
+- Use a separate MySQL database in `phpunit.xml` for automated tests.
 - Store receipt and payment proof uploads on Laravel's local `public` disk for the first implementation.
 - Use Form Requests for validation, Eloquent relationships for domain traversal, policies or middleware for access control, and flash/Inertia validation errors for feedback.
 
@@ -70,7 +70,7 @@ Settlement generation computes net balances per group from confirmed payments an
 
 ## Testing
 
-Keep automated tests on SQLite via `phpunit.xml`; runtime defaults still move to MySQL.
+Keep automated tests on a dedicated MySQL database via `phpunit.xml`; runtime defaults also use MySQL.
 
 Add focused Pest coverage for:
 
