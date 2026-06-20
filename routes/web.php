@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\StatsController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\GroupExpenseController;
@@ -34,8 +36,9 @@ Route::middleware(['auth', 'active', 'system.admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('users', fn () => response('Admin users'))->name('users.index');
-        Route::get('stats', fn () => response('Admin stats'))->name('stats.index');
+        Route::get('users', [UserController::class, 'index'])->name('users.index');
+        Route::patch('users/{user}/status', [UserController::class, 'updateStatus'])->name('users.status');
+        Route::get('stats', StatsController::class)->name('stats.index');
     });
 
 require __DIR__.'/settings.php';
