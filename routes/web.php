@@ -3,6 +3,7 @@
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\GroupExpenseController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SettlementController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
@@ -20,6 +21,9 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::post('payments/{payment}/pay', [PaymentController::class, 'pay'])->name('payments.pay');
     Route::patch('payments/{payment}/confirm', [PaymentController::class, 'confirm'])->name('payments.confirm');
     Route::patch('payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
+
+    Route::get('settlements/{group}', [SettlementController::class, 'show'])->name('settlements.show');
+    Route::post('settlements/generate/{group}', [SettlementController::class, 'generate'])->name('settlements.generate');
 });
 
 Route::middleware(['auth', 'active', 'system.admin'])
