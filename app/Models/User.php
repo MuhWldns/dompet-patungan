@@ -34,6 +34,14 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'role' => 'user',
+        'is_active' => true,
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
