@@ -6,6 +6,7 @@ use App\Http\Requests\RejectPaymentRequest;
 use App\Http\Requests\StorePaymentRequest;
 use App\Models\Group;
 use App\Models\Payment;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -26,7 +27,7 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function pay(StorePaymentRequest $request, Payment $payment): RedirectResponse
+    public function pay(StorePaymentRequest $request, Payment $payment, NotificationService $notificationService): RedirectResponse
     {
         abort_unless($payment->user_id === $request->user()->id, 403);
         abort_unless(in_array($payment->status, ['pending', 'rejected'], true), 403);
@@ -41,10 +42,18 @@ class PaymentController extends Controller
             'paid_at' => now(),
         ]);
 
+        $payment->load('expense.payer');
+        $notificationService->send(
+            $payment->expense->payer,
+            'payment.submitted',
+            "Pembayaran {$payment->expense->title} menunggu konfirmasi.",
+            route('groups.show', $payment->expense->group_id),
+        );
+
         return redirect()->route('payments.index');
     }
 
-    public function confirm(Request $request, Payment $payment): RedirectResponse
+    public function confirm(Request $request, Payment $payment, NotificationService $notificationService): RedirectResponse
     {
         $this->authorizeAdmin($request, $payment);
 
@@ -53,10 +62,18 @@ class PaymentController extends Controller
             'rejection_reason' => null,
         ]);
 
+        $payment->load('expense', 'user');
+        $notificationService->send(
+            $payment->user,
+            'payment.confirmed',
+            "Pembayaran {$payment->expense->title} sudah dikonfirmasi.",
+            route('payments.index'),
+        );
+
         return back();
     }
 
-    public function reject(RejectPaymentRequest $request, Payment $payment): RedirectResponse
+    public function reject(RejectPaymentRequest $request, Payment $payment, NotificationService $notificationService): RedirectResponse
     {
         $this->authorizeAdmin($request, $payment);
 
@@ -64,6 +81,14 @@ class PaymentController extends Controller
             'status' => 'rejected',
             'rejection_reason' => $request->validated('rejection_reason'),
         ]);
+
+        $payment->load('expense', 'user');
+        $notificationService->send(
+            $payment->user,
+            'payment.rejected',
+            "Pembayaran {$payment->expense->title} ditolak.",
+            route('payments.index'),
+        );
 
         return back();
     }

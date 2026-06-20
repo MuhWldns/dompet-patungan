@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Group;
 use App\Models\Settlement;
+use App\Services\NotificationService;
 use App\Services\SettlementService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +24,12 @@ class SettlementController extends Controller
         ]);
     }
 
-    public function generate(Request $request, Group $group, SettlementService $settlementService): RedirectResponse
+    public function generate(
+        Request $request,
+        Group $group,
+        SettlementService $settlementService,
+        NotificationService $notificationService,
+    ): RedirectResponse
     {
         abort_unless($this->isAdmin($request, $group), 403);
 
@@ -33,6 +39,13 @@ class SettlementController extends Controller
             'debt_details' => $settlementService->calculate($group),
             'generated_at' => now(),
         ]);
+
+        $group->members()->each(fn ($member) => $notificationService->send(
+            $member,
+            'settlement.generated',
+            "Settlement {$group->name} sudah dibuat.",
+            route('settlements.show', $group),
+        ));
 
         return redirect()->route('settlements.show', $group);
     }

@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\GroupExpenseController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SettlementController;
 use Illuminate\Support\Facades\Route;
@@ -9,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 Route::inertia('/', 'Welcome')->name('home');
 
 Route::middleware(['auth', 'active', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     Route::get('groups', [GroupController::class, 'index'])->name('groups.index');
     Route::post('groups', [GroupController::class, 'store'])->name('groups.store');
@@ -24,6 +26,8 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
 
     Route::get('settlements/{group}', [SettlementController::class, 'show'])->name('settlements.show');
     Route::post('settlements/generate/{group}', [SettlementController::class, 'generate'])->name('settlements.generate');
+
+    Route::patch('notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
 });
 
 Route::middleware(['auth', 'active', 'system.admin'])

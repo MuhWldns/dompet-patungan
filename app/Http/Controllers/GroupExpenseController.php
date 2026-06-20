@@ -6,6 +6,7 @@ use App\Http\Requests\StoreExpenseRequest;
 use App\Models\Expense;
 use App\Models\Group;
 use App\Services\ExpenseSplitService;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -15,13 +16,14 @@ class GroupExpenseController extends Controller
         StoreExpenseRequest $request,
         Group $group,
         ExpenseSplitService $splitService,
+        NotificationService $notificationService,
     ): RedirectResponse {
         abort_unless($this->isAdmin($request, $group), 403);
 
         $validated = $request->validated();
         $receiptPath = $request->file('receipt')?->store('receipts', 'public');
 
-        DB::transaction(function () use ($group, $request, $validated, $receiptPath, $splitService): void {
+        DB::transaction(function () use ($group, $request, $validated, $receiptPath, $splitService, $notificationService): void {
             $expense = Expense::query()->create([
                 'group_id' => $group->id,
                 'payer_id' => $request->user()->id,
@@ -48,6 +50,19 @@ class GroupExpenseController extends Controller
                     'amount' => $amount,
                     'status' => 'pending',
                 ]);
+
+                if ($userId !== $request->user()->id) {
+                    $member = $group->members()->whereKey($userId)->first();
+
+                    if ($member !== null) {
+                        $notificationService->send(
+                            $member,
+                            'bill.created',
+                            "Tagihan baru {$expense->title} sebesar Rp {$amount}",
+                            route('payments.index'),
+                        );
+                    }
+                }
             }
         });
 
