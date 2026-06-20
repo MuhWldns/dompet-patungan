@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 
 type User = {
     id: number;
@@ -27,11 +27,39 @@ type Group = {
     expenses: Expense[];
 };
 
-defineProps<{
+const props = defineProps<{
     group: Group;
     inviteUrl: string;
     isAdmin: boolean;
 }>();
+
+const expenseForm = useForm<{
+    title: string;
+    amount: string;
+    category: string;
+    date: string;
+    split_method: 'equal' | 'custom';
+    receipt: File | null;
+}>({
+    title: '',
+    amount: '',
+    category: '',
+    date: new Date().toISOString().slice(0, 10),
+    split_method: 'equal',
+    receipt: null,
+});
+
+function setReceipt(event: Event) {
+    const input = event.target as HTMLInputElement;
+    expenseForm.receipt = input.files?.[0] ?? null;
+}
+
+function submitExpense() {
+    expenseForm.post(`/groups/${props.group.id}/expenses`, {
+        forceFormData: true,
+        onSuccess: () => expenseForm.reset('title', 'amount', 'category', 'receipt'),
+    });
+}
 </script>
 
 <template>
@@ -105,6 +133,98 @@ defineProps<{
                     Belum ada pengeluaran di grup ini.
                 </p>
             </div>
+        </section>
+
+        <section v-if="isAdmin" class="rounded-3xl bg-[#f4f4f4] p-6">
+            <h2 class="text-2xl font-semibold text-black">Tambah pengeluaran</h2>
+            <form
+                class="mt-5 grid gap-4 md:grid-cols-2"
+                @submit.prevent="submitExpense"
+            >
+                <label class="block text-sm font-semibold text-black">
+                    Judul
+                    <input
+                        v-model="expenseForm.title"
+                        class="mt-2 h-12 w-full rounded-xl border border-black/10 bg-white px-4 text-black"
+                        name="title"
+                    />
+                    <span
+                        v-if="expenseForm.errors.title"
+                        class="mt-1 block text-sm text-red-600"
+                    >
+                        {{ expenseForm.errors.title }}
+                    </span>
+                </label>
+
+                <label class="block text-sm font-semibold text-black">
+                    Jumlah
+                    <input
+                        v-model="expenseForm.amount"
+                        class="mt-2 h-12 w-full rounded-xl border border-black/10 bg-white px-4 text-black"
+                        min="0"
+                        name="amount"
+                        step="0.01"
+                        type="number"
+                    />
+                    <span
+                        v-if="expenseForm.errors.amount"
+                        class="mt-1 block text-sm text-red-600"
+                    >
+                        {{ expenseForm.errors.amount }}
+                    </span>
+                </label>
+
+                <label class="block text-sm font-semibold text-black">
+                    Kategori
+                    <input
+                        v-model="expenseForm.category"
+                        class="mt-2 h-12 w-full rounded-xl border border-black/10 bg-white px-4 text-black"
+                        name="category"
+                    />
+                </label>
+
+                <label class="block text-sm font-semibold text-black">
+                    Tanggal
+                    <input
+                        v-model="expenseForm.date"
+                        class="mt-2 h-12 w-full rounded-xl border border-black/10 bg-white px-4 text-black"
+                        name="date"
+                        type="date"
+                    />
+                </label>
+
+                <label class="block text-sm font-semibold text-black">
+                    Metode split
+                    <select
+                        v-model="expenseForm.split_method"
+                        class="mt-2 h-12 w-full rounded-xl border border-black/10 bg-white px-4 text-black"
+                        name="split_method"
+                    >
+                        <option value="equal">Rata semua anggota</option>
+                        <option value="custom">Kustom via backend</option>
+                    </select>
+                </label>
+
+                <label class="block text-sm font-semibold text-black">
+                    Struk
+                    <input
+                        class="mt-2 h-12 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-black"
+                        name="receipt"
+                        type="file"
+                        @change="setReceipt"
+                    />
+                </label>
+
+                <div class="md:col-span-2">
+                    <button
+                        class="h-12 rounded-full bg-black px-6 font-semibold text-white disabled:opacity-50"
+                        :disabled="expenseForm.processing"
+                        type="submit"
+                    >
+                        Simpan pengeluaran
+                    </button>
+                </div>
+            </form>
         </section>
     </main>
 </template>
