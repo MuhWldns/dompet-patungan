@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreExpenseRequest;
 use App\Models\Expense;
 use App\Models\Group;
+use App\Models\User;
 use App\Services\ExpenseSplitService;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
@@ -52,7 +53,7 @@ class GroupExpenseController extends Controller
                 ]);
 
                 if ($userId !== $request->user()->id) {
-                    $member = $group->members()->whereKey($userId)->first();
+                    $member = User::query()->find($userId);
 
                     if ($member !== null) {
                         $notificationService->send(

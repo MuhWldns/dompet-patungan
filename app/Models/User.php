@@ -55,11 +55,13 @@ class User extends Authenticatable
         ];
     }
 
+    /** @return HasMany<Group, $this> */
     public function createdGroups(): HasMany
     {
         return $this->hasMany(Group::class, 'creator_id');
     }
 
+    /** @return BelongsToMany<Group, $this> */
     public function groups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class, 'group_members')
@@ -67,31 +69,37 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    /** @return HasMany<GroupMember, $this> */
     public function memberships(): HasMany
     {
         return $this->hasMany(GroupMember::class);
     }
 
+    /** @return HasMany<Expense, $this> */
     public function expenses(): HasMany
     {
         return $this->hasMany(Expense::class, 'payer_id');
     }
 
+    /** @return HasMany<ExpenseSplit, $this> */
     public function expenseSplits(): HasMany
     {
         return $this->hasMany(ExpenseSplit::class);
     }
 
+    /** @return HasMany<Payment, $this> */
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }
 
+    /** @return HasMany<Settlement, $this> */
     public function generatedSettlements(): HasMany
     {
         return $this->hasMany(Settlement::class, 'generated_by');
     }
 
+    /** @return HasMany<Notification, $this> */
     public function appNotifications(): HasMany
     {
         return $this->hasMany(Notification::class);

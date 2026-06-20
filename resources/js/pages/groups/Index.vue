@@ -36,13 +36,18 @@ function submit() {
             <p class="text-sm font-semibold tracking-[0.24px] text-white/70">
                 Dompet Patungan
             </p>
-            <div class="mt-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div
+                class="mt-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
+            >
                 <div>
-                    <h1 class="text-4xl font-semibold tracking-[-0.04em] md:text-6xl">
+                    <h1
+                        class="text-4xl font-semibold tracking-[-0.04em] md:text-6xl"
+                    >
                         Kelola grup patungan
                     </h1>
                     <p class="mt-4 max-w-2xl text-white/70">
-                        Buat grup, undang anggota, dan lacak pengeluaran bersama.
+                        Buat grup, undang anggota, dan lacak pengeluaran
+                        bersama.
                     </p>
                 </div>
             </div>
@@ -65,7 +70,9 @@ function submit() {
                                 {{ group.description ?? 'Tidak ada deskripsi' }}
                             </p>
                         </div>
-                        <span class="rounded-full bg-black px-3 py-1 text-xs font-semibold text-white">
+                        <span
+                            class="rounded-full bg-black px-3 py-1 text-xs font-semibold text-white"
+                        >
                             {{ group.status }}
                         </span>
                     </div>

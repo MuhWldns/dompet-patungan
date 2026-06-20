@@ -47,7 +47,9 @@ function submit(payment: Payment) {
     <main class="flex flex-col gap-6 p-4 md:p-8">
         <section class="rounded-[2rem] bg-black p-8 text-white md:p-10">
             <p class="text-sm font-semibold text-white/60">Tagihan saya</p>
-            <h1 class="mt-3 text-4xl font-semibold tracking-[-0.04em] md:text-6xl">
+            <h1
+                class="mt-3 text-4xl font-semibold tracking-[-0.04em] md:text-6xl"
+            >
                 Pembayaran patungan
             </h1>
             <p class="mt-4 max-w-2xl text-white/70">
@@ -61,7 +63,9 @@ function submit(payment: Payment) {
                 :key="payment.id"
                 class="rounded-3xl border border-black/10 p-6"
             >
-                <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div
+                    class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between"
+                >
                     <div>
                         <p class="text-sm font-semibold text-black/50">
                             {{ payment.expense.group.name }}
@@ -111,7 +115,10 @@ function submit(payment: Payment) {
                 </div>
             </article>
 
-            <p v-if="payments.length === 0" class="rounded-3xl border border-dashed border-black/20 p-8 text-black/60">
+            <p
+                v-if="payments.length === 0"
+                class="rounded-3xl border border-dashed border-black/20 p-8 text-black/60"
+            >
                 Belum ada tagihan.
             </p>
         </section>

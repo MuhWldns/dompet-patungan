@@ -22,7 +22,9 @@ defineProps<{
     <main class="flex flex-col gap-6 p-4 md:p-8">
         <section class="rounded-[2rem] bg-black p-8 text-white md:p-10">
             <p class="text-sm font-semibold text-white/60">System admin</p>
-            <h1 class="mt-3 text-4xl font-semibold tracking-[-0.04em] md:text-6xl">
+            <h1
+                class="mt-3 text-4xl font-semibold tracking-[-0.04em] md:text-6xl"
+            >
                 Users
             </h1>
         </section>

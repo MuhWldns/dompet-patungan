@@ -42,12 +42,13 @@ class PaymentController extends Controller
             'paid_at' => now(),
         ]);
 
-        $payment->load('expense.payer');
+        $expense = $payment->expense()->firstOrFail();
+        $payer = $expense->payer()->firstOrFail();
         $notificationService->send(
-            $payment->expense->payer,
+            $payer,
             'payment.submitted',
-            "Pembayaran {$payment->expense->title} menunggu konfirmasi.",
-            route('groups.show', $payment->expense->group_id),
+            "Pembayaran {$expense->title} menunggu konfirmasi.",
+            route('groups.show', $expense->group_id),
         );
 
         return redirect()->route('payments.index');
@@ -62,11 +63,12 @@ class PaymentController extends Controller
             'rejection_reason' => null,
         ]);
 
-        $payment->load('expense', 'user');
+        $expense = $payment->expense()->firstOrFail();
+        $user = $payment->user()->firstOrFail();
         $notificationService->send(
-            $payment->user,
+            $user,
             'payment.confirmed',
-            "Pembayaran {$payment->expense->title} sudah dikonfirmasi.",
+            "Pembayaran {$expense->title} sudah dikonfirmasi.",
             route('payments.index'),
         );
 
@@ -82,11 +84,12 @@ class PaymentController extends Controller
             'rejection_reason' => $request->validated('rejection_reason'),
         ]);
 
-        $payment->load('expense', 'user');
+        $expense = $payment->expense()->firstOrFail();
+        $user = $payment->user()->firstOrFail();
         $notificationService->send(
-            $payment->user,
+            $user,
             'payment.rejected',
-            "Pembayaran {$payment->expense->title} ditolak.",
+            "Pembayaran {$expense->title} ditolak.",
             route('payments.index'),
         );
 
@@ -95,7 +98,7 @@ class PaymentController extends Controller
 
     private function authorizeAdmin(Request $request, Payment $payment): void
     {
-        $group = $payment->expense()->with('group')->firstOrFail()->group;
+        $group = $payment->expense()->firstOrFail()->group()->firstOrFail();
 
         abort_unless($this->isAdmin($request, $group), 403);
     }

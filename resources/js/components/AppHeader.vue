@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from '@lucide/vue';
+import {
+    CreditCard,
+    Folder,
+    LayoutGrid,
+    Menu,
+    Search,
+    Shield,
+    Users,
+} from '@lucide/vue';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
@@ -48,29 +56,46 @@ const props = withDefaults(defineProps<Props>(), {
 
 const page = usePage();
 const auth = computed(() => page.props.auth);
+const authUser = computed(
+    () => page.props.auth.user as { role?: string } | null,
+);
 const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
 
 const activeItemStyles =
     'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
 
-const mainNavItems: NavItem[] = [
+const mainNavItems = computed<NavItem[]>(() => [
     {
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
     },
-];
+    {
+        title: 'Groups',
+        href: '/groups',
+        icon: Users,
+    },
+    {
+        title: 'Payments',
+        href: '/payments',
+        icon: CreditCard,
+    },
+    ...(authUser.value?.role === 'system_admin'
+        ? [
+              {
+                  title: 'Admin',
+                  href: '/admin/users',
+                  icon: Shield,
+              },
+          ]
+        : []),
+]);
 
 const rightNavItems: NavItem[] = [
     {
         title: 'Repository',
         href: 'https://github.com/laravel/vue-starter-kit',
         icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
     },
 ];
 </script>

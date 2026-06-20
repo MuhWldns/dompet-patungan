@@ -31,7 +31,9 @@ const props = defineProps<{
     <main class="flex flex-col gap-6 p-4 md:p-8">
         <section class="rounded-[2rem] bg-black p-8 text-white md:p-10">
             <p class="text-sm font-semibold text-white/60">Settlement</p>
-            <h1 class="mt-3 text-4xl font-semibold tracking-[-0.04em] md:text-6xl">
+            <h1
+                class="mt-3 text-4xl font-semibold tracking-[-0.04em] md:text-6xl"
+            >
                 {{ group.name }}
             </h1>
             <p class="mt-4 max-w-2xl text-white/70">
@@ -57,7 +59,8 @@ const props = defineProps<{
                     class="rounded-2xl bg-[#f4f4f4] p-4"
                 >
                     <p class="font-semibold text-black">
-                        {{ transfer.from_name }} bayar Rp {{ transfer.amount }} ke
+                        {{ transfer.from_name }} bayar Rp
+                        {{ transfer.amount }} ke
                         {{ transfer.to_name }}
                     </p>
                 </div>

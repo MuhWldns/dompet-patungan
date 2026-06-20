@@ -4,7 +4,7 @@
 
 - This is a Laravel 13 app using PHP `^8.3`, Vue 3, Inertia v3, Tailwind CSS v4, Fortify, Pest 4, Larastan, and Laravel Wayfinder.
 - Runtime routes are web/Inertia routes, not a separate API: `bootstrap/app.php` wires `routes/web.php`, and `routes/web.php` includes `routes/settings.php`.
-- The product spec is in `Docs/ABOUT_PROJECT.md`; the current implemented app is still close to the Laravel Vue starter kit, so verify code before assuming every spec route/model exists.
+- The product spec is in `Docs/ABOUT_PROJECT.md`; implemented domain routes now cover groups, expenses/splits, payments, settlements, notifications, and system-admin aggregate/user management.
 - The visual brief is `Docs/DESIGN.md`: dark/white full-bleed band rhythm, true black `#000000`, scarce cobalt `#494fdf`, pill buttons, no card shadows. Current CSS still uses the starter shadcn/Tailwind token set.
 
 ## Commands
@@ -21,7 +21,8 @@
 ## Testing Notes
 
 - Focused PHP tests can be run with `php artisan test --filter=Name` or a path like `php artisan test tests/Feature/DashboardTest.php`.
-- PHPUnit uses in-memory SQLite for tests via `phpunit.xml`; Feature tests get `RefreshDatabase` automatically from `tests/Pest.php`.
+- PHPUnit uses a MySQL test database via `phpunit.xml` (`dompet_patungan_test`); Feature tests get `RefreshDatabase` automatically from `tests/Pest.php`.
+- Do not run multiple `php artisan test ...` processes in parallel against the same MySQL test database; migrations can collide and deadlock. Run focused suites sequentially.
 - CI tests install Node and Composer dependencies, copy `.env.example`, run `php artisan key:generate`, build assets, run `composer types:check`, then `php artisan test`.
 - CI lint is mutating: `.github/workflows/lint.yml` runs `composer lint`, `npm run format`, and `npm run lint`, not check-only variants.
 
@@ -29,6 +30,7 @@
 
 - Inertia pages live under `resources/js/pages`; page names are lowercase where routes/Fortify reference them, e.g. `auth/Login`, `settings/Appearance`.
 - `resources/js/app.ts` assigns layouts by page name: `Welcome` has no layout, `auth/*` uses `AuthLayout`, `settings/*` nests `[AppLayout, SettingsLayout]`, everything else uses `AppLayout`.
+- Product Inertia pages use lowercase folders: `groups/Index`, `groups/Show`, `payments/Index`, `settlements/Show`, `admin/Users`, `admin/Stats`.
 - Use Inertia navigation/forms instead of Vue Router or Axios page-loading patterns; shared props currently include `name`, `auth.user`, and `sidebarOpen` from `HandleInertiaRequests`.
 - TypeScript alias `@/*` maps to `resources/js/*`.
 - Wayfinder is enabled in `vite.config.ts` with `formVariants: true`; generated files under `resources/js/actions/**`, `resources/js/routes/**`, and `resources/js/wayfinder/**` are lint-ignored, so do not hand-edit them.

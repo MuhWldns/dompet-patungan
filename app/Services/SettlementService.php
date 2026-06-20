@@ -2,7 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\Expense;
+use App\Models\ExpenseSplit;
 use App\Models\Group;
+use App\Models\Payment;
+use App\Models\User;
 
 class SettlementService
 {
@@ -16,18 +20,26 @@ class SettlementService
         $names = [];
 
         foreach ($group->members as $member) {
+            /** @var User $member */
             $balances[$member->id] = 0;
             $names[$member->id] = $member->name;
         }
 
         foreach ($group->expenses as $expense) {
+            /** @var Expense $expense */
             $balances[$expense->payer_id] += $this->toCents((string) $expense->amount);
 
             foreach ($expense->splits as $split) {
+                /** @var ExpenseSplit $split */
                 $balances[$split->user_id] -= $this->toCents((string) $split->amount);
             }
 
-            foreach ($expense->payments->where('status', 'confirmed') as $payment) {
+            foreach ($expense->payments as $payment) {
+                /** @var Payment $payment */
+                if ($payment->status !== 'confirmed') {
+                    continue;
+                }
+
                 $balances[$payment->user_id] += $this->toCents((string) $payment->amount);
                 $balances[$expense->payer_id] -= $this->toCents((string) $payment->amount);
             }

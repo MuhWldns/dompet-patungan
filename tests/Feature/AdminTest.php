@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\User;
 use App\Models\Expense;
 use App\Models\Group;
 use App\Models\Payment;
+use App\Models\User;
 
 test('normal users cannot access system admin pages', function () {
     $user = User::factory()->create();

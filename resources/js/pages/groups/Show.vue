@@ -65,7 +65,8 @@ function setReceipt(event: Event) {
 function submitExpense() {
     expenseForm.post(`/groups/${props.group.id}/expenses`, {
         forceFormData: true,
-        onSuccess: () => expenseForm.reset('title', 'amount', 'category', 'receipt'),
+        onSuccess: () =>
+            expenseForm.reset('title', 'amount', 'category', 'receipt'),
     });
 }
 </script>
@@ -79,12 +80,16 @@ function submitExpense() {
         </Link>
 
         <section class="rounded-[2rem] bg-black p-8 text-white md:p-10">
-            <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div
+                class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between"
+            >
                 <div>
                     <p class="text-sm font-semibold text-white/60">
                         {{ group.status }}
                     </p>
-                    <h1 class="mt-3 text-4xl font-semibold tracking-[-0.04em] md:text-6xl">
+                    <h1
+                        class="mt-3 text-4xl font-semibold tracking-[-0.04em] md:text-6xl"
+                    >
                         {{ group.name }}
                     </h1>
                     <p class="mt-4 max-w-2xl text-white/70">
@@ -92,10 +97,12 @@ function submitExpense() {
                     </p>
                 </div>
                 <div v-if="isAdmin" class="rounded-3xl bg-white p-4 text-black">
-                    <p class="text-xs font-semibold uppercase tracking-[0.24px] text-black/50">
+                    <p
+                        class="text-xs font-semibold tracking-[0.24px] text-black/50 uppercase"
+                    >
                         Invite link
                     </p>
-                    <p class="mt-2 break-all text-sm">{{ inviteUrl }}</p>
+                    <p class="mt-2 text-sm break-all">{{ inviteUrl }}</p>
                 </div>
             </div>
         </section>
@@ -110,10 +117,16 @@ function submitExpense() {
                         class="flex items-center justify-between rounded-2xl bg-[#f4f4f4] p-4"
                     >
                         <div>
-                            <p class="font-semibold text-black">{{ member.name }}</p>
-                            <p class="text-sm text-black/60">{{ member.email }}</p>
+                            <p class="font-semibold text-black">
+                                {{ member.name }}
+                            </p>
+                            <p class="text-sm text-black/60">
+                                {{ member.email }}
+                            </p>
                         </div>
-                        <span class="rounded-full bg-black px-3 py-1 text-xs font-semibold text-white">
+                        <span
+                            class="rounded-full bg-black px-3 py-1 text-xs font-semibold text-white"
+                        >
                             {{ member.pivot?.role ?? 'member' }}
                         </span>
                     </li>
@@ -129,11 +142,16 @@ function submitExpense() {
                         class="rounded-2xl bg-[#f4f4f4] p-4"
                     >
                         <div class="flex items-center justify-between gap-4">
-                            <p class="font-semibold text-black">{{ expense.title }}</p>
-                            <p class="font-semibold text-black">Rp {{ expense.amount }}</p>
+                            <p class="font-semibold text-black">
+                                {{ expense.title }}
+                            </p>
+                            <p class="font-semibold text-black">
+                                Rp {{ expense.amount }}
+                            </p>
                         </div>
                         <p class="mt-1 text-sm text-black/60">
-                            {{ expense.status }} oleh {{ expense.payer?.name ?? 'admin' }}
+                            {{ expense.status }} oleh
+                            {{ expense.payer?.name ?? 'admin' }}
                         </p>
                         <div
                             v-if="isAdmin && expense.payments?.length"
@@ -144,9 +162,12 @@ function submitExpense() {
                                 :key="payment.id"
                                 class="rounded-xl bg-white p-3 text-sm"
                             >
-                                <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                                <div
+                                    class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between"
+                                >
                                     <p class="text-black/70">
-                                        {{ payment.user.name }} · Rp {{ payment.amount }} ·
+                                        {{ payment.user.name }} · Rp
+                                        {{ payment.amount }} ·
                                         {{ payment.status }}
                                     </p>
                                     <div
@@ -182,7 +203,9 @@ function submitExpense() {
         </section>
 
         <section v-if="isAdmin" class="rounded-3xl bg-[#f4f4f4] p-6">
-            <h2 class="text-2xl font-semibold text-black">Tambah pengeluaran</h2>
+            <h2 class="text-2xl font-semibold text-black">
+                Tambah pengeluaran
+            </h2>
             <form
                 class="mt-5 grid gap-4 md:grid-cols-2"
                 @submit.prevent="submitExpense"

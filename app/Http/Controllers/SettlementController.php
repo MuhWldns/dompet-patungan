@@ -29,8 +29,7 @@ class SettlementController extends Controller
         Group $group,
         SettlementService $settlementService,
         NotificationService $notificationService,
-    ): RedirectResponse
-    {
+    ): RedirectResponse {
         abort_unless($this->isAdmin($request, $group), 403);
 
         Settlement::query()->create([
