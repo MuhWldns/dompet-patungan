@@ -18,6 +18,12 @@ class UserController extends Controller
                 ->select(['id', 'name', 'email', 'role', 'is_active', 'created_at'])
                 ->latest()
                 ->paginate(20),
+            'summary' => [
+                'total' => User::query()->count(),
+                'active' => User::query()->where('is_active', true)->count(),
+                'inactive' => User::query()->where('is_active', false)->count(),
+                'systemAdmins' => User::query()->where('role', 'system_admin')->count(),
+            ],
         ]);
     }
 

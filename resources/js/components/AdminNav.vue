@@ -1,20 +1,26 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BarChart3, Users } from '@lucide/vue';
+import { BarChart3, Shield, Users } from '@lucide/vue';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 
 const { isCurrentUrl } = useCurrentUrl();
 
 const items = [
     {
-        title: 'Users',
-        description: 'Manage user access and status',
+        title: 'User Control',
+        description: 'Manage access, roles, and account activation',
         href: '/admin/users',
+        icon: Shield,
+    },
+    {
+        title: 'Group Monitoring',
+        description: 'Review group health and activity aggregates',
+        href: '/admin/groups',
         icon: Users,
     },
     {
-        title: 'Stats',
-        description: 'View aggregate platform metrics',
+        title: 'Platform Metrics',
+        description: 'Monitor aggregate operational signals',
         href: '/admin/stats',
         icon: BarChart3,
     },
@@ -22,7 +28,7 @@ const items = [
 </script>
 
 <template>
-    <nav class="grid gap-3 md:grid-cols-2" aria-label="Admin navigation">
+    <nav class="grid gap-3 md:grid-cols-3" aria-label="Admin navigation">
         <Link
             v-for="item in items"
             :key="item.href"

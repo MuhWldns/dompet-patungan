@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\GroupController as AdminGroupController;
 use App\Http\Controllers\Admin\StatsController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
@@ -39,6 +40,7 @@ Route::middleware(['auth', 'active', 'system.admin'])
     ->group(function () {
         Route::get('users', [UserController::class, 'index'])->name('users.index');
         Route::patch('users/{user}/status', [UserController::class, 'updateStatus'])->name('users.status');
+        Route::get('groups', [AdminGroupController::class, 'index'])->name('groups.index');
         Route::get('stats', StatsController::class)->name('stats.index');
     });
 

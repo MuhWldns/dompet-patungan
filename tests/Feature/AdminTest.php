@@ -25,20 +25,44 @@ test('system admins can access system admin pages', function () {
     $response->assertOk();
 });
 
+test('system admins are redirected from user dashboard to admin monitoring', function () {
+    $admin = User::factory()->create(['role' => 'system_admin']);
+
+    $response = $this
+        ->actingAs($admin)
+        ->get(route('dashboard'));
+
+    $response->assertRedirect(route('admin.stats.index'));
+});
+
+test('system admins can access group monitoring', function () {
+    $admin = User::factory()->create(['role' => 'system_admin']);
+
+    $response = $this
+        ->actingAs($admin)
+        ->get(route('admin.groups.index'));
+
+    $response->assertOk();
+});
+
 test('system admins can deactivate and reactivate users', function () {
     $admin = User::factory()->create(['role' => 'system_admin']);
     $user = User::factory()->create();
 
     $this
         ->actingAs($admin)
-        ->patch(route('admin.users.status', $user), ['is_active' => false])
+        ->patch(route('admin.users.status', $user), [
+            'is_active' => false,
+        ])
         ->assertRedirect(route('admin.users.index'));
 
     expect($user->refresh()->is_active)->toBeFalse();
 
     $this
         ->actingAs($admin)
-        ->patch(route('admin.users.status', $user), ['is_active' => true])
+        ->patch(route('admin.users.status', $user), [
+            'is_active' => true,
+        ])
         ->assertRedirect(route('admin.users.index'));
 
     expect($user->refresh()->is_active)->toBeTrue();

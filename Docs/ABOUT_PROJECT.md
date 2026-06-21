@@ -23,7 +23,7 @@
 - **FR-04 (Pembayaran Tagihan):** Member melihat tagihan, memilih metode (transfer, tunai, QRIS), dan upload bukti bayar. [cite_start]Admin mengkonfirmasi atau menolak pembayaran tersebut. [cite: 30, 31, 32, 33, 34]
 - **FR-05 (Settlement & Rekap Utang):** Sistem menghitung utang bersih antar member untuk meminimalkan transaksi. [cite_start]Rekap (siapa bayar ke siapa) bisa dilihat oleh semua member. [cite: 37, 38, 39, 40, 41]
 - [cite_start]**FR-06 (Notifikasi):** Sistem mengirim notifikasi untuk tagihan baru, reminder telat bayar, konfirmasi admin, dan hasil settlement. [cite: 43, 44, 45, 46, 47]
-- [cite_start]**FR-07 (Manajemen Admin Sistem):** Admin sistem mengelola akun user (aktif/nonaktif untuk cabut sesi), melihat statistik platform agregat, moderasi laporan, dan memantau log, tanpa akses ke detail pengeluaran/privasi user. [cite: 49, 50, 51, 52, 53, 54]
+- [cite_start]**FR-07 (Manajemen Admin Sistem):** Admin sistem memiliki tampilan terpisah dari user biasa dan berfokus pada kontrol platform: manajemen akun user, aktivasi/nonaktivasi akun untuk mencabut akses, monitoring grup secara agregat, statistik operasional, dan kontrol administratif lain tanpa membuka detail pengeluaran/privasi user. [cite: 49, 50, 51, 52, 53, 54]
 
 ---
 
@@ -79,8 +79,12 @@ Routing tidak lagi menggunakan prefix `/api`. Semua _route_ didaftarkan di `rout
 
 **Admin Sistem (Middleware: `auth`, Custom Middleware: `role:system_admin`)**
 
-- `GET /admin/users` - Tampilan manajemen user.
-- `GET /admin/stats` - Tampilan statistik aplikasi.
+- `GET /admin/users` - Tampilan user control center untuk melihat akun, role, status aktif/nonaktif, dan menjalankan deactivate/reactivate account.
+- `PATCH /admin/users/{user}/status` - Kontrol aktif/nonaktif akun user. System admin tidak boleh menonaktifkan akunnya sendiri.
+- `GET /admin/groups` - Tampilan group monitoring untuk melihat agregat kesehatan grup, owner, jumlah member, jumlah pengeluaran, dan settlement tanpa membuka detail privat transaksi.
+- `GET /admin/stats` - Tampilan monitoring center berisi metrik agregat platform: user access, group health, payment operations, dan total nominal agregat.
+
+Catatan otorisasi: `system_admin` bukan admin semua grup. Role ini mengelola platform secara agregat dan kontrol akses user. Aksi operasional grup seperti tambah pengeluaran, konfirmasi pembayaran, dan generate settlement tetap membutuhkan role `admin` pada `group_members` untuk grup terkait.
 
 ---
 
@@ -91,9 +95,18 @@ Routing tidak lagi menggunakan prefix `/api`. Semua _route_ didaftarkan di `rout
 - **Routing:** Vue Router ditiadakan. Navigasi menggunakan komponen `<Link>` dari `@inertiajs/vue3`.
 - **Data Fetching:** Axios ditiadakan untuk load halaman. Data tagihan atau grup dikirim dari Laravel Controller langsung sebagai _Props_ ke komponen halaman Vue.
 - **Shared Data:** State global seperti informasi `user` yang sedang login atau pesan notifikasi _flash_ (berhasil/gagal) disuntikkan secara otomatis ke semua komponen Vue melalui file `HandleInertiaRequests.php` di Laravel.
+- **Role-based UI:** User biasa melihat dashboard, grup, pembayaran, settlement, dan notifikasi personal. `system_admin` diarahkan ke area `/admin/*` dengan navigasi berbeda yang hanya berisi user control, group monitoring, dan platform metrics.
 
 ### B. Folder Structure
 
 - `resources/js/Pages/` - Berisi komponen utama yang merender satu URL penuh (contoh: `Auth/Login.vue`, `Groups/Index.vue`, `Payments/Show.vue`).
 - `resources/js/Components/` - Berisi potongan UI yang _reusable_ (contoh: `PrimaryButton.vue`, `ExpenseCard.vue`, `ModalUpload.vue`).
 - `resources/js/Layouts/` - Berisi _wrapper_ layout (contoh: `AuthenticatedLayout.vue` yang membawa Navbar dan Sidebar).
+
+### C. Tampilan Admin Sistem
+
+- Sidebar/header untuk `system_admin` berbeda dari user biasa: menu utama diarahkan ke `/admin/stats`, `/admin/users`, dan `/admin/groups`.
+- `/dashboard` untuk `system_admin` melakukan redirect ke `/admin/stats` agar admin langsung masuk ke monitoring center.
+- `/admin/users` menampilkan ringkasan total/aktif/nonaktif/system admin dan tombol deactivate/reactivate account.
+- `/admin/groups` menampilkan monitoring grup agregat: status grup, owner, jumlah member, jumlah pengeluaran, dan jumlah settlement.
+- `/admin/stats` menampilkan monitoring operasional agregat dan tidak menampilkan judul/detail pengeluaran privat.

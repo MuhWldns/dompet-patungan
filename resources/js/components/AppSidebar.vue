@@ -23,37 +23,45 @@ const authUser = computed(
     () => page.props.auth.user as { role?: string } | null,
 );
 
-const mainNavItems = computed<NavItem[]>(() => [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Groups',
-        href: '/groups',
-        icon: Users,
-    },
-    {
-        title: 'Payments',
-        href: '/payments',
-        icon: CreditCard,
-    },
-    ...(authUser.value?.role === 'system_admin'
-        ? [
-              {
-                  title: 'Admin Users',
-                  href: '/admin/users',
-                  icon: Shield,
-              },
-              {
-                  title: 'Admin Stats',
-                  href: '/admin/stats',
-                  icon: BarChart3,
-              },
-          ]
-        : []),
-]);
+const mainNavItems = computed<NavItem[]>(() => {
+    if (authUser.value?.role === 'system_admin') {
+        return [
+            {
+                title: 'User Control',
+                href: '/admin/users',
+                icon: Shield,
+            },
+            {
+                title: 'Group Monitoring',
+                href: '/admin/groups',
+                icon: Users,
+            },
+            {
+                title: 'Admin Monitoring',
+                href: '/admin/stats',
+                icon: BarChart3,
+            },
+        ];
+    }
+
+    return [
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+        {
+            title: 'Groups',
+            href: '/groups',
+            icon: Users,
+        },
+        {
+            title: 'Payments',
+            href: '/payments',
+            icon: CreditCard,
+        },
+    ];
+});
 
 const footerNavItems: NavItem[] = [];
 </script>
