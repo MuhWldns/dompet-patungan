@@ -26,6 +26,7 @@ defineProps<{
     summary: Summary;
     recentGroups: Group[];
     notifications: Notification[];
+    filter?: string;
 }>();
 </script>
 
@@ -95,9 +96,56 @@ defineProps<{
             </div>
 
             <div class="vh-card">
-                <h2 class="text-2xl font-semibold text-foreground">
-                    Notifikasi
-                </h2>
+                <div class="flex items-center justify-between gap-4">
+                    <h2 class="text-2xl font-semibold text-foreground">
+                        Notifikasi
+                    </h2>
+                    <Link
+                        href="/notifications/mark-all-read"
+                        as="button"
+                        class="vh-link text-sm"
+                        method="patch"
+                    >
+                        Tandai semua dibaca
+                    </Link>
+                </div>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <Link
+                        href="/dashboard"
+                        class="vh-chip"
+                        :class="!filter ? 'vh-chip-primary' : 'vh-chip-muted'"
+                    >
+                        Semua
+                    </Link>
+                    <Link
+                        href="/dashboard?filter=unread"
+                        class="vh-chip"
+                        :class="filter === 'unread' ? 'vh-chip-primary' : 'vh-chip-muted'"
+                    >
+                        Belum dibaca
+                    </Link>
+                    <Link
+                        href="/dashboard?filter=bill.created"
+                        class="vh-chip"
+                        :class="filter === 'bill.created' ? 'vh-chip-primary' : 'vh-chip-muted'"
+                    >
+                        Tagihan
+                    </Link>
+                    <Link
+                        href="/dashboard?filter=payment.submitted"
+                        class="vh-chip"
+                        :class="filter === 'payment.submitted' ? 'vh-chip-primary' : 'vh-chip-muted'"
+                    >
+                        Pembayaran
+                    </Link>
+                    <Link
+                        href="/dashboard?filter=settlement.generated"
+                        class="vh-chip"
+                        :class="filter === 'settlement.generated' ? 'vh-chip-primary' : 'vh-chip-muted'"
+                    >
+                        Settlement
+                    </Link>
+                </div>
                 <div class="mt-4">
                     <NotificationList :notifications="notifications" />
                 </div>

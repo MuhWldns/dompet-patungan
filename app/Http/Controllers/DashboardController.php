@@ -17,6 +17,15 @@ class DashboardController extends Controller
             return redirect()->route('admin.stats.index');
         }
 
+        $filter = $request->query('filter');
+        $notificationsQuery = $user->appNotifications()->latest()->limit(8);
+
+        if ($filter === 'unread') {
+            $notificationsQuery->whereNull('read_at');
+        } elseif ($filter !== null) {
+            $notificationsQuery->where('type', $filter);
+        }
+
         return Inertia::render('Dashboard', [
             'summary' => [
                 'groups' => $user->groups()->count(),
@@ -24,7 +33,8 @@ class DashboardController extends Controller
                 'unreadNotifications' => $user->appNotifications()->whereNull('read_at')->count(),
             ],
             'recentGroups' => $user->groups()->latest('groups.created_at')->limit(5)->get(),
-            'notifications' => $user->appNotifications()->latest()->limit(8)->get(),
+            'notifications' => $notificationsQuery->get(),
+            'filter' => $filter,
         ]);
     }
 }

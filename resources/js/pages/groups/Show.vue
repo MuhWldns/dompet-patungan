@@ -116,6 +116,17 @@ function submitExpense() {
         },
     });
 }
+
+const statusForm = useForm<{ status: string }>({ status: '' });
+
+function updateStatus(newStatus: string) {
+    statusForm.status = newStatus;
+    statusForm.patch(`/groups/${props.group.id}/status`, {
+        onSuccess: () => {
+            statusForm.reset();
+        },
+    });
+}
 </script>
 
 <template>
@@ -150,6 +161,17 @@ function submitExpense() {
                     </p>
                     <p class="mt-2 text-sm break-all">{{ inviteUrl }}</p>
                 </div>
+                <div v-if="isAdmin" class="flex gap-2">
+                    <select
+                        :value="group.status"
+                        class="vh-input text-sm"
+                        @change="updateStatus(($event.target as HTMLSelectElement).value)"
+                    >
+                        <option value="active">Active</option>
+                        <option value="settled">Settled</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                </div>
             </div>
         </section>
 
@@ -173,6 +195,18 @@ function submitExpense() {
                         <span class="vh-chip vh-chip-navy">
                             {{ member.pivot?.role ?? 'member' }}
                         </span>
+                        <Link
+                            v-if="isAdmin || member.id === $page.props.auth.user.id"
+                            :href="`/groups/${group.id}/members/${member.id}`"
+                            as="button"
+                            class="rounded-lg p-1 text-muted-foreground hover:text-destructive"
+                            method="delete"
+                            :confirm="member.id === $page.props.auth.user.id ? 'Yakin ingin keluar dari grup?' : 'Yakin ingin mengeluarkan anggota ini?'"
+                        >
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </Link>
                     </li>
                 </ul>
             </div>

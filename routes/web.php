@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\GroupExpenseController;
+use App\Http\Controllers\GroupMemberController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SettlementController;
@@ -22,6 +23,8 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::get('groups/{group}/join/{token}', [GroupController::class, 'joinPreview'])->name('groups.join.show');
     Route::post('groups/{group}/join/{token}', [GroupController::class, 'join'])->name('groups.join');
     Route::get('groups/{group}', [GroupController::class, 'show'])->name('groups.show');
+    Route::delete('groups/{group}/members/{user}', [GroupMemberController::class, 'destroy'])->name('groups.members.destroy');
+    Route::patch('groups/{group}/status', [GroupController::class, 'updateStatus'])->name('groups.status.update');
 
     Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
     Route::post('payments/{payment}/pay', [PaymentController::class, 'pay'])->name('payments.pay');
@@ -31,6 +34,9 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::get('settlements/{group}', [SettlementController::class, 'show'])->name('settlements.show');
     Route::post('settlements/generate/{group}', [SettlementController::class, 'generate'])->name('settlements.generate');
 
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
+    Route::patch('notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::patch('notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
 });
 
