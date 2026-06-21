@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
 import {
+    BarChart3,
     CreditCard,
     LayoutGrid,
     Menu,
@@ -75,9 +76,14 @@ const mainNavItems = computed<NavItem[]>(() => [
     ...(authUser.value?.role === 'system_admin'
         ? [
               {
-                  title: 'Admin',
+                  title: 'Admin Users',
                   href: '/admin/users',
                   icon: Shield,
+              },
+              {
+                  title: 'Admin Stats',
+                  href: '/admin/stats',
+                  icon: BarChart3,
               },
           ]
         : []),

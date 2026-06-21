@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
+import AdminNav from '@/components/AdminNav.vue';
 
 type User = {
     id: number;
@@ -24,6 +25,8 @@ defineProps<{
             <p class="vh-eyebrow">System admin</p>
             <h1 class="vh-title">Users</h1>
         </section>
+
+        <AdminNav />
 
         <section
             class="overflow-hidden rounded-lg border border-border bg-card"

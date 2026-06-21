@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
+import AdminNav from '@/components/AdminNav.vue';
 
 type Stats = {
     users: number;
@@ -27,6 +28,8 @@ defineProps<{
                 here.
             </p>
         </section>
+
+        <AdminNav />
 
         <section class="grid gap-4 md:grid-cols-3">
             <div v-for="(value, key) in stats" :key="key" class="vh-stat-card">

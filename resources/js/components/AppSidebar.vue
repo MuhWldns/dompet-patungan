@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { CreditCard, LayoutGrid, Shield, Users } from '@lucide/vue';
+import { BarChart3, CreditCard, LayoutGrid, Shield, Users } from '@lucide/vue';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -42,9 +42,14 @@ const mainNavItems = computed<NavItem[]>(() => [
     ...(authUser.value?.role === 'system_admin'
         ? [
               {
-                  title: 'Admin',
+                  title: 'Admin Users',
                   href: '/admin/users',
                   icon: Shield,
+              },
+              {
+                  title: 'Admin Stats',
+                  href: '/admin/stats',
+                  icon: BarChart3,
               },
           ]
         : []),
