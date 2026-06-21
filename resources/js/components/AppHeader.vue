@@ -2,6 +2,7 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import {
     BarChart3,
+    Bell,
     CreditCard,
     LayoutGrid,
     Menu,
@@ -9,7 +10,8 @@ import {
     Shield,
     Users,
 } from '@lucide/vue';
-import { computed } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import axios from 'axios';
 import AppLogo from '@/components/AppLogo.vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
@@ -53,6 +55,29 @@ const authUser = computed(
     () => page.props.auth.user as { role?: string } | null,
 );
 const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
+
+const unreadCount = ref(0);
+let pollInterval: ReturnType<typeof setInterval> | null = null;
+
+async function fetchUnreadCount() {
+    try {
+        const response = await axios.get('/notifications/unread-count');
+        unreadCount.value = response.data.count;
+    } catch {
+        console.error('Failed to fetch unread count');
+    }
+}
+
+onMounted(() => {
+    fetchUnreadCount();
+    pollInterval = setInterval(fetchUnreadCount, 30000);
+});
+
+onUnmounted(() => {
+    if (pollInterval) {
+        clearInterval(pollInterval);
+    }
+});
 
 const activeItemStyles =
     'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
@@ -206,6 +231,19 @@ const mainNavItems = computed<NavItem[]>(() => {
                             />
                         </Button>
                     </div>
+
+                    <Link
+                        href="/dashboard"
+                        class="relative flex items-center justify-center rounded-full p-2 hover:bg-accent"
+                    >
+                        <Bell class="h-5 w-5 text-muted-foreground" />
+                        <span
+                            v-if="unreadCount > 0"
+                            class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs font-semibold text-destructive-foreground"
+                        >
+                            {{ unreadCount > 9 ? '9+' : unreadCount }}
+                        </span>
+                    </Link>
 
                     <DropdownMenu>
                         <DropdownMenuTrigger :as-child="true">

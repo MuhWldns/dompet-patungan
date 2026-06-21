@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreGroupRequest;
 use App\Models\Group;
+use App\Models\Notification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -89,6 +90,40 @@ class GroupController extends Controller
         ]);
 
         return redirect()->route('groups.show', $group);
+    }
+
+    public function updateStatus(Request $request, Group $group): RedirectResponse
+    {
+        abort_unless($this->isAdmin($request, $group), 403);
+
+        $validated = $request->validate([
+            'status' => ['required', 'in:settled,closed'],
+        ]);
+
+        if ($group->status === 'closed') {
+            return back()->withErrors(['status' => 'Grup yang sudah ditutup tidak dapat dibuka kembali.']);
+        }
+
+        $group->update(['status' => $validated['status']]);
+
+        $members = $group->members()->whereKeyNot($request->user()->id)->get();
+        foreach ($members as $member) {
+            Notification::query()->create([
+                'user_id' => $member->id,
+                'type' => 'group.status_changed',
+                'message' => "Status grup {$group->name} berubah ke {$validated['status']}",
+                'link' => route('groups.show', $group),
+            ]);
+        }
+
+        Notification::query()->create([
+            'user_id' => $request->user()->id,
+            'type' => 'group.status_changed',
+            'message' => "Status grup {$group->name} berubah ke {$validated['status']}",
+            'link' => route('groups.show', $group),
+        ]);
+
+        return back();
     }
 
     private function isMember(Request $request, Group $group): bool

@@ -10,16 +10,24 @@ type Notification = {
 };
 
 defineProps<{
-    notifications: Notification[];
+    notifications: Notification[] | { data: Notification[] };
 }>();
+
+function getNotifications(notifications: Notification[] | { data: Notification[] }): Notification[] {
+    if (Array.isArray(notifications)) {
+        return notifications;
+    }
+    return notifications.data;
+}
 </script>
 
 <template>
     <div class="grid gap-3">
         <div
-            v-for="notification in notifications"
+            v-for="notification in getNotifications(notifications)"
             :key="notification.id"
             class="vh-muted-card"
+            :class="{ 'opacity-60': notification.read_at }"
         >
             <p class="font-semibold text-foreground">
                 {{ notification.message }}
@@ -44,8 +52,8 @@ defineProps<{
             </div>
         </div>
 
-        <p v-if="notifications.length === 0" class="text-muted-foreground">
-            Belum ada notifikasi.
+        <p v-if="getNotifications(notifications).length === 0" class="text-muted-foreground">
+            Tidak ada notifikasi.
         </p>
     </div>
 </template>
