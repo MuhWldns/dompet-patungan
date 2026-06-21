@@ -19,14 +19,16 @@ defineProps<{
         <div
             v-for="notification in notifications"
             :key="notification.id"
-            class="rounded-2xl bg-[#f4f4f4] p-4"
+            class="vh-muted-card"
         >
-            <p class="font-semibold text-black">{{ notification.message }}</p>
+            <p class="font-semibold text-foreground">
+                {{ notification.message }}
+            </p>
             <div class="mt-3 flex gap-3 text-sm">
                 <Link
                     v-if="notification.link"
                     :href="notification.link"
-                    class="font-semibold text-[#494fdf]"
+                    class="vh-link"
                 >
                     Buka
                 </Link>
@@ -34,7 +36,7 @@ defineProps<{
                     v-if="!notification.read_at"
                     :href="`/notifications/${notification.id}/read`"
                     as="button"
-                    class="font-semibold text-black"
+                    class="font-semibold text-primary"
                     method="patch"
                 >
                     Tandai dibaca
@@ -42,7 +44,7 @@ defineProps<{
             </div>
         </div>
 
-        <p v-if="notifications.length === 0" class="text-black/60">
+        <p v-if="notifications.length === 0" class="text-muted-foreground">
             Belum ada notifikasi.
         </p>
     </div>

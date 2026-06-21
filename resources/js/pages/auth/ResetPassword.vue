@@ -11,8 +11,8 @@ import { update } from '@/routes/password';
 
 defineOptions({
     layout: {
-        title: 'Reset password',
-        description: 'Please enter your new password below',
+        title: 'Buat password baru',
+        description: 'Masukkan password baru untuk akun Dompet Patungan.',
     },
 });
 
@@ -28,63 +28,67 @@ const inputEmail = ref(props.email);
 <template>
     <Head title="Reset password" />
 
-    <Form
-        v-bind="update.form()"
-        :transform="(data) => ({ ...data, token, email })"
-        :reset-on-success="['password', 'password_confirmation']"
-        v-slot="{ errors, processing }"
-    >
-        <div class="grid gap-6">
-            <div class="grid gap-2">
-                <Label for="email">Email</Label>
-                <Input
-                    id="email"
-                    type="email"
-                    name="email"
-                    autocomplete="email"
-                    v-model="inputEmail"
-                    class="mt-1 block w-full"
-                    readonly
-                />
-                <InputError :message="errors.email" class="mt-2" />
-            </div>
+    <div class="rounded-lg border border-border bg-card p-6 shadow-none">
+        <Form
+            v-bind="update.form()"
+            :transform="(data) => ({ ...data, token, email })"
+            :reset-on-success="['password', 'password_confirmation']"
+            v-slot="{ errors, processing }"
+        >
+            <div class="grid gap-6">
+                <div class="grid gap-2">
+                    <Label for="email">Email</Label>
+                    <Input
+                        id="email"
+                        type="email"
+                        name="email"
+                        autocomplete="email"
+                        v-model="inputEmail"
+                        class="mt-1 block w-full"
+                        readonly
+                    />
+                    <InputError :message="errors.email" class="mt-2" />
+                </div>
 
-            <div class="grid gap-2">
-                <Label for="password">Password</Label>
-                <PasswordInput
-                    id="password"
-                    name="password"
-                    autocomplete="new-password"
-                    class="mt-1 block w-full"
-                    autofocus
-                    placeholder="Password"
-                    :passwordrules="passwordRules"
-                />
-                <InputError :message="errors.password" />
-            </div>
+                <div class="grid gap-2">
+                    <Label for="password">Password</Label>
+                    <PasswordInput
+                        id="password"
+                        name="password"
+                        autocomplete="new-password"
+                        class="mt-1 block w-full"
+                        autofocus
+                        placeholder="Password baru"
+                        :passwordrules="passwordRules"
+                    />
+                    <InputError :message="errors.password" />
+                </div>
 
-            <div class="grid gap-2">
-                <Label for="password_confirmation"> Confirm password </Label>
-                <PasswordInput
-                    id="password_confirmation"
-                    name="password_confirmation"
-                    autocomplete="new-password"
-                    class="mt-1 block w-full"
-                    placeholder="Confirm password"
-                    :passwordrules="passwordRules"
-                />
-                <InputError :message="errors.password_confirmation" />
-            </div>
+                <div class="grid gap-2">
+                    <Label for="password_confirmation"
+                        >Konfirmasi password</Label
+                    >
+                    <PasswordInput
+                        id="password_confirmation"
+                        name="password_confirmation"
+                        autocomplete="new-password"
+                        class="mt-1 block w-full"
+                        placeholder="Ulangi password baru"
+                        :passwordrules="passwordRules"
+                    />
+                    <InputError :message="errors.password_confirmation" />
+                </div>
 
-            <Button
-                type="submit"
-                class="mt-4 w-full"
-                :disabled="processing"
-                data-test="reset-password-button"
-            >
-                <Spinner v-if="processing" />
-                Reset password
-            </Button>
-        </div>
-    </Form>
+                <Button
+                    type="submit"
+                    class="mt-4 w-full"
+                    :disabled="processing"
+                    data-test="reset-password-button"
+                >
+                    <Spinner v-if="processing" />
+                    Reset password
+                </Button>
+            </div>
+        </Form>
+    </div>
 </template>

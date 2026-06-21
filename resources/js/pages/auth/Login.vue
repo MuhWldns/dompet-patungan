@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
-import { request } from '@/routes/password';
 
 defineOptions({
     layout: {
@@ -40,19 +39,19 @@ defineProps<{
         v-bind="store.form()"
         :reset-on-success="['password']"
         v-slot="{ errors, processing }"
-        class="rounded-[2rem] border border-black/10 bg-white p-5 shadow-none"
+        class="rounded-lg border border-border bg-card p-6 shadow-none"
     >
         <div class="grid gap-4">
             <div>
-                <p class="text-sm font-semibold text-[#494fdf]">
+                <p class="text-sm font-semibold text-tertiary">
                     Dompet Patungan
                 </p>
                 <h2
-                    class="mt-2 text-xl font-semibold tracking-[-0.03em] text-black"
+                    class="mt-2 text-xl font-semibold tracking-[-0.03em] text-foreground"
                 >
                     Masuk ke Dompet Patungan
                 </h2>
-                <p class="mt-1.5 text-sm text-black/60">
+                <p class="mt-1.5 text-sm text-muted-foreground">
                     Pantau tagihan, upload bukti bayar, dan selesaikan utang
                     grup.
                 </p>
@@ -73,17 +72,7 @@ defineProps<{
             </div>
 
             <div class="grid gap-2">
-                <div class="flex items-center justify-between">
-                    <Label for="password">Password</Label>
-                    <TextLink
-                        v-if="canResetPassword"
-                        :href="request()"
-                        class="text-sm"
-                        :tabindex="5"
-                    >
-                        Lupa password?
-                    </TextLink>
-                </div>
+                <Label for="password">Password</Label>
                 <PasswordInput
                     id="password"
                     name="password"
@@ -104,7 +93,7 @@ defineProps<{
 
             <Button
                 type="submit"
-                class="mt-2 w-full rounded-full bg-black text-white hover:bg-black/90"
+                class="mt-2 w-full"
                 :tabindex="4"
                 :disabled="processing"
                 data-test="login-button"
@@ -113,11 +102,11 @@ defineProps<{
                 Masuk
             </Button>
 
-            <p class="text-center text-sm text-black/60">
+            <p class="text-center text-sm text-muted-foreground">
                 Belum punya akun?
                 <TextLink
                     :href="register()"
-                    class="font-semibold text-[#494fdf]"
+                    class="font-semibold text-tertiary"
                 >
                     Daftar Dompet Patungan
                 </TextLink>

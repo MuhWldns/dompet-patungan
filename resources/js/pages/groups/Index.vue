@@ -31,21 +31,15 @@ function submit() {
 <template>
     <Head title="Groups" />
 
-    <main class="flex flex-col gap-8 p-4 md:p-8">
-        <section class="rounded-[2rem] bg-black p-8 text-white md:p-10">
-            <p class="text-sm font-semibold tracking-[0.24px] text-white/70">
-                Dompet Patungan
-            </p>
+    <main class="vh-page">
+        <section class="vh-hero">
+            <p class="vh-eyebrow">Dompet Patungan</p>
             <div
                 class="mt-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
             >
                 <div>
-                    <h1
-                        class="text-4xl font-semibold tracking-[-0.04em] md:text-6xl"
-                    >
-                        Kelola grup patungan
-                    </h1>
-                    <p class="mt-4 max-w-2xl text-white/70">
+                    <h1 class="vh-title">Kelola grup patungan</h1>
+                    <p class="vh-description">
                         Buat grup, undang anggota, dan lacak pengeluaran
                         bersama.
                     </p>
@@ -59,36 +53,36 @@ function submit() {
                     v-for="group in groups"
                     :key="group.id"
                     :href="`/groups/${group.id}`"
-                    class="group cursor-pointer rounded-3xl border border-black/10 bg-white p-5 transition duration-200 hover:-translate-y-0.5 hover:border-[#494fdf] hover:bg-[#f8f8ff]"
+                    class="group vh-card cursor-pointer transition duration-200 hover:border-tertiary hover:bg-accent"
                 >
                     <div class="flex items-start justify-between gap-4">
                         <div>
-                            <h2 class="text-2xl font-semibold text-black">
+                            <h2 class="text-2xl font-semibold text-foreground">
                                 {{ group.name }}
                             </h2>
-                            <p class="mt-2 text-sm text-black/60">
+                            <p class="mt-2 text-sm text-muted-foreground">
                                 {{ group.description ?? 'Tidak ada deskripsi' }}
                             </p>
-                            <p class="mt-3 text-sm font-medium text-black/70">
+                            <p
+                                class="mt-3 text-sm font-medium text-muted-foreground"
+                            >
                                 Klik untuk melihat anggota, pengeluaran, dan
                                 settlement.
                             </p>
                         </div>
-                        <span
-                            class="rounded-full bg-black px-3 py-1 text-xs font-semibold text-white"
-                        >
+                        <span class="vh-chip vh-chip-navy">
                             {{ group.status }}
                         </span>
                     </div>
                     <div
-                        class="mt-5 flex flex-col gap-3 text-sm text-black/60 sm:flex-row sm:items-center sm:justify-between"
+                        class="mt-5 flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between"
                     >
                         <div class="flex gap-3">
                             <span>{{ group.members_count }} anggota</span>
                             <span>{{ group.expenses_count }} pengeluaran</span>
                         </div>
                         <span
-                            class="font-semibold text-[#494fdf] transition group-hover:translate-x-1"
+                            class="vh-link transition group-hover:translate-x-1"
                         >
                             Buka grup ->
                         </span>
@@ -97,40 +91,39 @@ function submit() {
 
                 <div
                     v-if="groups.length === 0"
-                    class="rounded-3xl border border-dashed border-black/20 p-8 text-black/60"
+                    class="rounded-lg border border-dashed border-border bg-card p-8 text-muted-foreground"
                 >
                     Belum ada grup. Buat grup pertama di form sebelah kanan.
                 </div>
             </div>
 
-            <form class="rounded-3xl bg-[#f4f4f4] p-6" @submit.prevent="submit">
-                <h2 class="text-xl font-semibold text-black">Buat grup</h2>
-                <label class="mt-5 block text-sm font-semibold text-black">
+            <form class="vh-card" @submit.prevent="submit">
+                <h2 class="text-xl font-semibold text-foreground">Buat grup</h2>
+                <label class="mt-5 block text-sm font-medium text-foreground">
                     Nama grup
-                    <input
-                        v-model="form.name"
-                        class="mt-2 h-12 w-full rounded-xl border border-black/10 bg-white px-4 text-black"
-                        name="name"
-                    />
+                    <input v-model="form.name" class="vh-input" name="name" />
                 </label>
-                <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">
+                <p
+                    v-if="form.errors.name"
+                    class="mt-1 text-sm text-destructive"
+                >
                     {{ form.errors.name }}
                 </p>
 
-                <label class="mt-4 block text-sm font-semibold text-black">
+                <label class="mt-4 block text-sm font-medium text-foreground">
                     Deskripsi
                     <textarea
                         v-model="form.description"
-                        class="mt-2 min-h-24 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-black"
+                        class="vh-textarea"
                         name="description"
                     />
                 </label>
 
-                <label class="mt-4 block text-sm font-semibold text-black">
+                <label class="mt-4 block text-sm font-medium text-foreground">
                     Target dana
                     <input
                         v-model="form.target_amount"
-                        class="mt-2 h-12 w-full rounded-xl border border-black/10 bg-white px-4 text-black"
+                        class="vh-input"
                         name="target_amount"
                         type="number"
                         min="0"
@@ -138,7 +131,7 @@ function submit() {
                 </label>
 
                 <button
-                    class="mt-6 h-12 rounded-full bg-black px-6 font-semibold text-white disabled:opacity-50"
+                    class="vh-primary-action mt-6"
                     :disabled="form.processing"
                     type="submit"
                 >

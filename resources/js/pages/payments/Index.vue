@@ -44,15 +44,11 @@ function submit(payment: Payment) {
 <template>
     <Head title="Payments" />
 
-    <main class="flex flex-col gap-6 p-4 md:p-8">
-        <section class="rounded-[2rem] bg-black p-8 text-white md:p-10">
-            <p class="text-sm font-semibold text-white/60">Tagihan saya</p>
-            <h1
-                class="mt-3 text-4xl font-semibold tracking-[-0.04em] md:text-6xl"
-            >
-                Pembayaran patungan
-            </h1>
-            <p class="mt-4 max-w-2xl text-white/70">
+    <main class="vh-page">
+        <section class="vh-hero">
+            <p class="vh-eyebrow">Tagihan saya</p>
+            <h1 class="vh-title">Pembayaran patungan</h1>
+            <p class="vh-description">
                 Lihat tagihan, pilih metode bayar, dan unggah bukti pembayaran.
             </p>
         </section>
@@ -61,24 +57,24 @@ function submit(payment: Payment) {
             <article
                 v-for="payment in payments"
                 :key="payment.id"
-                class="rounded-3xl border border-black/10 p-6"
+                class="vh-card"
             >
                 <div
                     class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between"
                 >
                     <div>
-                        <p class="text-sm font-semibold text-black/50">
+                        <p class="vh-stat-label">
                             {{ payment.expense.group.name }}
                         </p>
-                        <h2 class="mt-1 text-2xl font-semibold text-black">
+                        <h2 class="mt-1 text-2xl font-semibold text-foreground">
                             {{ payment.expense.title }}
                         </h2>
-                        <p class="mt-2 text-black/60">
+                        <p class="mt-2 text-muted-foreground">
                             Rp {{ payment.amount }} · {{ payment.status }}
                         </p>
                         <p
                             v-if="payment.rejection_reason"
-                            class="mt-2 text-sm text-red-600"
+                            class="mt-2 text-sm text-destructive"
                         >
                             {{ payment.rejection_reason }}
                         </p>
@@ -91,7 +87,7 @@ function submit(payment: Payment) {
                     >
                         <select
                             v-model="form.payment_method"
-                            class="h-12 rounded-xl border border-black/10 px-4"
+                            class="vh-input mt-0"
                             name="payment_method"
                         >
                             <option value="transfer">Transfer</option>
@@ -99,13 +95,13 @@ function submit(payment: Payment) {
                             <option value="qris">QRIS</option>
                         </select>
                         <input
-                            class="h-12 rounded-xl border border-black/10 px-4 py-3"
+                            class="vh-input mt-0 py-2.5"
                             name="proof"
                             type="file"
                             @change="setProof"
                         />
                         <button
-                            class="h-12 rounded-full bg-black px-5 font-semibold text-white disabled:opacity-50"
+                            class="vh-primary-action"
                             :disabled="form.processing"
                             type="submit"
                         >
@@ -117,7 +113,7 @@ function submit(payment: Payment) {
 
             <p
                 v-if="payments.length === 0"
-                class="rounded-3xl border border-dashed border-black/20 p-8 text-black/60"
+                class="rounded-lg border border-dashed border-border bg-card p-8 text-muted-foreground"
             >
                 Belum ada tagihan.
             </p>

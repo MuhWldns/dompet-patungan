@@ -29,19 +29,19 @@ defineProps<{
         v-bind="store.form()"
         :reset-on-success="['password', 'password_confirmation']"
         v-slot="{ errors, processing }"
-        class="rounded-[2rem] border border-black/10 bg-white p-5 shadow-none"
+        class="rounded-lg border border-border bg-card p-6 shadow-none"
     >
         <div class="grid gap-4">
             <div>
-                <p class="text-sm font-semibold text-[#494fdf]">
+                <p class="text-sm font-semibold text-tertiary">
                     Dompet Patungan
                 </p>
                 <h2
-                    class="mt-2 text-xl font-semibold tracking-[-0.03em] text-black"
+                    class="mt-2 text-xl font-semibold tracking-[-0.03em] text-foreground"
                 >
                     Daftar Dompet Patungan
                 </h2>
-                <p class="mt-1.5 text-sm text-black/60">
+                <p class="mt-1.5 text-sm text-muted-foreground">
                     Buat akun, undang teman, lalu mulai catat patungan pertama.
                 </p>
             </div>
@@ -82,7 +82,7 @@ defineProps<{
                     placeholder="Minimal 8 karakter"
                     required
                 />
-                <p class="text-xs text-black/50">{{ passwordRules }}</p>
+                <p class="text-xs text-muted-foreground">{{ passwordRules }}</p>
                 <InputError :message="errors.password" />
             </div>
 
@@ -98,18 +98,14 @@ defineProps<{
                 <InputError :message="errors.password_confirmation" />
             </div>
 
-            <Button
-                class="mt-2 w-full rounded-full bg-black text-white hover:bg-black/90"
-                :disabled="processing"
-                type="submit"
-            >
+            <Button class="mt-2 w-full" :disabled="processing" type="submit">
                 <Spinner v-if="processing" />
                 Daftar
             </Button>
 
-            <p class="text-center text-sm text-black/60">
+            <p class="text-center text-sm text-muted-foreground">
                 Sudah punya akun?
-                <Link :href="login()" class="font-semibold text-[#494fdf]">
+                <Link :href="login()" class="font-semibold text-tertiary">
                     Masuk
                 </Link>
             </p>

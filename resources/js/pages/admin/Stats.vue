@@ -18,28 +18,20 @@ defineProps<{
 <template>
     <Head title="Admin Stats" />
 
-    <main class="flex flex-col gap-6 p-4 md:p-8">
-        <section class="rounded-[2rem] bg-black p-8 text-white md:p-10">
-            <p class="text-sm font-semibold text-white/60">System admin</p>
-            <h1
-                class="mt-3 text-4xl font-semibold tracking-[-0.04em] md:text-6xl"
-            >
-                Aggregate stats
-            </h1>
-            <p class="mt-4 max-w-2xl text-white/70">
+    <main class="vh-page">
+        <section class="vh-hero">
+            <p class="vh-eyebrow">System admin</p>
+            <h1 class="vh-title">Aggregate stats</h1>
+            <p class="vh-description">
                 Platform totals only. Private expense details are not exposed
                 here.
             </p>
         </section>
 
         <section class="grid gap-4 md:grid-cols-3">
-            <div
-                v-for="(value, key) in stats"
-                :key="key"
-                class="rounded-3xl bg-[#f4f4f4] p-6"
-            >
-                <p class="text-sm font-semibold text-black/50">{{ key }}</p>
-                <p class="mt-3 text-3xl font-semibold text-black">
+            <div v-for="(value, key) in stats" :key="key" class="vh-stat-card">
+                <p class="vh-stat-label">{{ key }}</p>
+                <p class="vh-stat-value font-mono">
                     {{ value }}
                 </p>
             </div>
