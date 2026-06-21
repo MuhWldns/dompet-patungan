@@ -59,7 +59,7 @@ function submit() {
                     v-for="group in groups"
                     :key="group.id"
                     :href="`/groups/${group.id}`"
-                    class="rounded-3xl border border-black/10 bg-white p-6 transition hover:border-black"
+                    class="group cursor-pointer rounded-3xl border border-black/10 bg-white p-5 transition duration-200 hover:-translate-y-0.5 hover:border-[#494fdf] hover:bg-[#f8f8ff]"
                 >
                     <div class="flex items-start justify-between gap-4">
                         <div>
@@ -69,6 +69,10 @@ function submit() {
                             <p class="mt-2 text-sm text-black/60">
                                 {{ group.description ?? 'Tidak ada deskripsi' }}
                             </p>
+                            <p class="mt-3 text-sm font-medium text-black/70">
+                                Klik untuk melihat anggota, pengeluaran, dan
+                                settlement.
+                            </p>
                         </div>
                         <span
                             class="rounded-full bg-black px-3 py-1 text-xs font-semibold text-white"
@@ -76,9 +80,18 @@ function submit() {
                             {{ group.status }}
                         </span>
                     </div>
-                    <div class="mt-6 flex gap-3 text-sm text-black/60">
-                        <span>{{ group.members_count }} anggota</span>
-                        <span>{{ group.expenses_count }} pengeluaran</span>
+                    <div
+                        class="mt-5 flex flex-col gap-3 text-sm text-black/60 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                        <div class="flex gap-3">
+                            <span>{{ group.members_count }} anggota</span>
+                            <span>{{ group.expenses_count }} pengeluaran</span>
+                        </div>
+                        <span
+                            class="font-semibold text-[#494fdf] transition group-hover:translate-x-1"
+                        >
+                            Buka grup ->
+                        </span>
                     </div>
                 </Link>
 
