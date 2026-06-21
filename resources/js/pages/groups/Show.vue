@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 type User = {
     id: number;
@@ -41,12 +42,19 @@ const props = defineProps<{
     isAdmin: boolean;
 }>();
 
+function buildInitialSplits(): Record<number, string> {
+    return Object.fromEntries(
+        props.group.members.map((member) => [member.id, '']),
+    );
+}
+
 const expenseForm = useForm<{
     title: string;
     amount: string;
     category: string;
     date: string;
     split_method: 'equal' | 'custom';
+    splits: Record<number, string>;
     receipt: File | null;
 }>({
     title: '',
@@ -54,8 +62,44 @@ const expenseForm = useForm<{
     category: '',
     date: new Date().toISOString().slice(0, 10),
     split_method: 'equal',
+    splits: buildInitialSplits(),
     receipt: null,
 });
+
+const amountCents = computed(() => toCents(expenseForm.amount));
+const customSplitTotalCents = computed(() =>
+    Object.values(expenseForm.splits).reduce(
+        (total, amount) => total + toCents(amount),
+        0,
+    ),
+);
+const customSplitDifferenceCents = computed(
+    () => amountCents.value - customSplitTotalCents.value,
+);
+
+function toCents(value: string | number): number {
+    const numeric = Number(value || 0);
+
+    if (!Number.isFinite(numeric)) {
+        return 0;
+    }
+
+    return Math.round(numeric * 100);
+}
+
+function formatCents(cents: number): string {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 2,
+    }).format(cents / 100);
+}
+
+function getSplitError(memberId: number): string | undefined {
+    return (expenseForm.errors as Record<string, string | undefined>)[
+        `splits.${memberId}`
+    ];
+}
 
 function setReceipt(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -65,8 +109,11 @@ function setReceipt(event: Event) {
 function submitExpense() {
     expenseForm.post(`/groups/${props.group.id}/expenses`, {
         forceFormData: true,
-        onSuccess: () =>
-            expenseForm.reset('title', 'amount', 'category', 'receipt'),
+        onSuccess: () => {
+            expenseForm.reset('title', 'amount', 'category', 'receipt');
+            expenseForm.split_method = 'equal';
+            expenseForm.splits = buildInitialSplits();
+        },
     });
 }
 </script>
@@ -269,9 +316,102 @@ function submitExpense() {
                         name="split_method"
                     >
                         <option value="equal">Rata semua anggota</option>
-                        <option value="custom">Kustom via backend</option>
+                        <option value="custom">Kustom per anggota</option>
                     </select>
                 </label>
+
+                <section
+                    v-if="expenseForm.split_method === 'custom'"
+                    class="md:col-span-2"
+                >
+                    <div
+                        class="rounded-lg border border-border bg-background p-4"
+                    >
+                        <div
+                            class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between"
+                        >
+                            <div>
+                                <h3 class="font-semibold text-foreground">
+                                    Nominal custom per anggota
+                                </h3>
+                                <p class="mt-1 text-sm text-muted-foreground">
+                                    Isi nominal tagihan untuk tiap anggota.
+                                    Total custom harus sama dengan jumlah
+                                    pengeluaran.
+                                </p>
+                            </div>
+                            <div class="text-sm md:text-right">
+                                <p class="text-muted-foreground">
+                                    Total custom
+                                </p>
+                                <p
+                                    class="font-mono font-semibold text-foreground"
+                                >
+                                    {{ formatCents(customSplitTotalCents) }}
+                                </p>
+                                <p
+                                    :class="[
+                                        'mt-1 font-mono text-xs font-semibold',
+                                        customSplitDifferenceCents === 0
+                                            ? 'text-green-600'
+                                            : 'text-destructive',
+                                    ]"
+                                >
+                                    Selisih
+                                    {{
+                                        formatCents(customSplitDifferenceCents)
+                                    }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 grid gap-3">
+                            <label
+                                v-for="member in group.members"
+                                :key="member.id"
+                                class="grid gap-3 rounded-lg border border-border bg-card p-3 md:grid-cols-[1fr_220px] md:items-center"
+                            >
+                                <span>
+                                    <span
+                                        class="block font-semibold text-foreground"
+                                    >
+                                        {{ member.name }}
+                                    </span>
+                                    <span
+                                        class="block text-sm text-muted-foreground"
+                                    >
+                                        {{ member.email }} ·
+                                        {{ member.pivot?.role ?? 'member' }}
+                                    </span>
+                                </span>
+                                <span>
+                                    <input
+                                        v-model="expenseForm.splits[member.id]"
+                                        class="vh-input font-mono"
+                                        min="0"
+                                        :name="`splits[${member.id}]`"
+                                        placeholder="0.00"
+                                        step="0.01"
+                                        type="number"
+                                    />
+                                    <span
+                                        v-if="getSplitError(member.id)"
+                                        class="mt-1 block text-sm text-destructive"
+                                    >
+                                        {{ getSplitError(member.id) }}
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <p
+                            v-if="expenseForm.errors.splits"
+                            class="mt-3 text-sm text-destructive"
+                        >
+                            {{ expenseForm.errors.splits }}
+                        </p>
+                    </div>
+                </section>
 
                 <label class="block text-sm font-medium text-foreground">
                     Struk
