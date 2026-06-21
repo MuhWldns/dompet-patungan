@@ -102,6 +102,7 @@ Users have two role-related fields: `role` (string: `'user'` or `'system_admin'`
 - **ExpenseSplit** â belongsTo Expense, belongsTo User (the debtor)
 - **Payment** â belongsTo Expense, belongsTo User; status: `pending`, `confirmed`, `rejected`
 - **Settlement** â belongsTo Group, belongsTo User (generated_by); `debt_details` is JSONB
+- **Notification** â belongsTo User; fields: `type`, `message`, `link`, `read_at`; types: `bill.created`, `payment.submitted`, `payment.confirmed`, `payment.overdue`, `payment.rejected`, `settlement.generated`, `member.removed`, `member.left`, `group.status_changed`
 
 ### Form Requests (Validation)
 
@@ -126,9 +127,31 @@ The UI follows a calm, clinical health-theme design system:
 - **Shadows:** Gentle diffused â no heavy drop shadows
 - Full spec in `Docs/DESIGN.md`
 
+### Group Member Management
+
+`GroupMemberController@destroy` handles both admin kicks and self-leave:
+- Admin kicks: only group admins can remove other members; kicked member gets `member.removed` notification
+- Self-leave: any member can leave a group; remaining members get `member.left` notification
+- Last admin leaving: promotes the oldest (earliest-joined) member to admin
+- Last member leaving: group status auto-set to `closed`
+
+### Group Status Changes
+
+`GroupController@updateStatus` lets group admins change group status:
+- Allowed transitions: `active` → `settled`, `active` → `closed`
+- Closed groups cannot be reopened (validation prevents `closed` → `active`)
+- Status changes send `group.status_changed` notifications to all members
+
+### Notifications
+
+- **Polling:** `AppHeader.vue` polls `GET /notifications/unread-count` every 30 seconds for the bell badge
+- **Filtering:** Dashboard supports filter by `unread` status or by notification type (`bill.created`, `payment.submitted`, `settlement.generated`)
+- **Mark all read:** `PATCH /notifications/mark-all-read` marks all user notifications as read
+- **Overdue reminders:** `notifications:remind-overdue` artisan command (scheduled hourly) sends `payment.overdue` notifications for payments pending >24 hours with deduplication
+
 ### Uncommitted Changes
 
-The working tree currently has changes across admin controllers, Vue components for admin pages (Stats, Users, Groups), and related tests. See `git diff --stat` for details.
+All features committed on this branch. See `git log` for details.
 
 ## Testing Conventions
 
