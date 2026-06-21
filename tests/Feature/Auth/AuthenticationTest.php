@@ -10,6 +10,14 @@ test('login screen can be rendered', function () {
     $response->assertOk();
 });
 
+test('login screen uses dompet patungan product copy', function () {
+    $contents = file_get_contents(resource_path('js/pages/auth/Login.vue'));
+
+    expect($contents)->toContain('Masuk ke Dompet Patungan');
+    expect($contents)->not->toContain('Log in to your account');
+    expect($contents)->not->toContain('Enter your email and password below to log in');
+});
+
 test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
 

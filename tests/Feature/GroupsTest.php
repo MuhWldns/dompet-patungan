@@ -69,3 +69,84 @@ test('members can view group details', function () {
 
     $response->assertOk();
 });
+
+test('authenticated users can view group invite confirmation pages with valid tokens', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+    $group = Group::query()->create([
+        'creator_id' => $owner->id,
+        'name' => 'Weekend Trip',
+        'description' => 'Shared travel costs',
+        'invite_token' => 'weekend-token',
+    ]);
+
+    $response = $this
+        ->actingAs($member)
+        ->get(route('groups.join.show', [$group, 'weekend-token']));
+
+    $response
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('groups/Join')
+            ->where('group.id', $group->id)
+            ->where('group.name', 'Weekend Trip')
+            ->where('group.description', 'Shared travel costs')
+            ->where('group.status', 'active')
+            ->where('group.members_count', 0)
+            ->where('isMember', false)
+        );
+});
+
+test('guests opening group invite confirmation pages are redirected to login', function () {
+    $owner = User::factory()->create();
+    $group = Group::query()->create([
+        'creator_id' => $owner->id,
+        'name' => 'Guest Invite',
+        'invite_token' => 'guest-token',
+    ]);
+
+    $response = $this->get(route('groups.join.show', [$group, 'guest-token']));
+
+    $response->assertRedirect(route('login'));
+});
+
+test('group invite confirmation pages return not found for invalid tokens', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+    $group = Group::query()->create([
+        'creator_id' => $owner->id,
+        'name' => 'Invalid Invite',
+        'invite_token' => 'valid-token',
+    ]);
+
+    $response = $this
+        ->actingAs($member)
+        ->get(route('groups.join.show', [$group, 'wrong-token']));
+
+    $response->assertNotFound();
+});
+
+test('existing members can view group invite confirmation pages without duplicate membership', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+    $group = Group::query()->create([
+        'creator_id' => $owner->id,
+        'name' => 'Existing Member Invite',
+        'invite_token' => 'existing-token',
+    ]);
+    $group->members()->attach($member->id, ['role' => 'member']);
+
+    $response = $this
+        ->actingAs($member)
+        ->get(route('groups.join.show', [$group, 'existing-token']));
+
+    $response
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('groups/Join')
+            ->where('isMember', true)
+            ->where('group.members_count', 1)
+        );
+
+    expect($group->members()->whereKey($member->id)->count())->toBe(1);
+});

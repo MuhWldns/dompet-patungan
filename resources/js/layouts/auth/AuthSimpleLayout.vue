@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { home } from '@/routes';
 
 defineProps<{
@@ -10,34 +9,61 @@ defineProps<{
 </script>
 
 <template>
-    <div
-        class="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10"
-    >
-        <div class="w-full max-w-sm">
-            <div class="flex flex-col gap-8">
-                <div class="flex flex-col items-center gap-4">
-                    <Link
-                        :href="home()"
-                        class="flex flex-col items-center gap-2 font-medium"
-                    >
-                        <div
-                            class="mb-1 flex h-9 w-9 items-center justify-center rounded-md"
+    <div class="grid min-h-svh bg-black text-white lg:grid-cols-[1fr_1fr]">
+        <section class="hidden flex-col justify-between p-8 lg:flex">
+            <Link
+                :href="home()"
+                class="text-xl font-semibold tracking-[-0.03em]"
+            >
+                Dompet Patungan
+            </Link>
+            <div>
+                <p class="text-sm font-semibold text-white/50">
+                    Split. Bayar. Selesai.
+                </p>
+                <h2
+                    class="mt-4 max-w-xl text-5xl leading-none font-semibold tracking-[-0.06em]"
+                >
+                    Semua tagihan grup tetap transparan.
+                </h2>
+                <p class="mt-5 max-w-lg text-white/65">
+                    Login untuk melihat grup, pembayaran tertunda, notifikasi,
+                    dan settlement terbaru.
+                </p>
+            </div>
+            <div class="grid grid-cols-3 gap-3 text-sm text-white/70">
+                <div class="rounded-3xl bg-white/10 p-3">Grup</div>
+                <div class="rounded-3xl bg-white/10 p-3">Bukti bayar</div>
+                <div class="rounded-3xl bg-[#494fdf] p-3 text-white">
+                    Settlement
+                </div>
+            </div>
+        </section>
+
+        <section
+            class="flex items-center justify-center bg-white p-5 text-black md:p-8"
+        >
+            <div class="w-full max-w-md">
+                <div class="flex flex-col gap-5">
+                    <div class="flex flex-col gap-3 text-left">
+                        <Link
+                            :href="home()"
+                            class="text-sm font-semibold text-[#494fdf] lg:hidden"
                         >
-                            <AppLogoIcon
-                                class="size-9 fill-current text-[var(--foreground)] dark:text-white"
-                            />
-                        </div>
-                        <span class="sr-only">{{ title }}</span>
-                    </Link>
-                    <div class="space-y-2 text-center">
-                        <h1 class="text-xl font-medium">{{ title }}</h1>
-                        <p class="text-center text-sm text-muted-foreground">
+                            Dompet Patungan
+                        </Link>
+                        <h1
+                            class="text-2xl font-semibold tracking-[-0.04em] text-black"
+                        >
+                            {{ title }}
+                        </h1>
+                        <p class="text-sm leading-6 text-black/60">
                             {{ description }}
                         </p>
                     </div>
+                    <slot />
                 </div>
-                <slot />
             </div>
-        </div>
+        </section>
     </div>
 </template>

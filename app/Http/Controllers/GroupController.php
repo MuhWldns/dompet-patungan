@@ -60,6 +60,26 @@ class GroupController extends Controller
         ]);
     }
 
+    public function joinPreview(Request $request, Group $group, string $token): Response
+    {
+        abort_unless(hash_equals($group->invite_token, $token), 404);
+
+        $group->loadCount('members');
+
+        return Inertia::render('groups/Join', [
+            'group' => [
+                'id' => $group->id,
+                'name' => $group->name,
+                'description' => $group->description,
+                'status' => $group->status,
+                'members_count' => $group->members_count,
+            ],
+            'isMember' => $this->isMember($request, $group),
+            'joinUrl' => route('groups.join', [$group, $token]),
+            'groupUrl' => route('groups.show', $group),
+        ]);
+    }
+
     public function join(Request $request, Group $group, string $token): RedirectResponse
     {
         abort_unless(hash_equals($group->invite_token, $token), 404);
