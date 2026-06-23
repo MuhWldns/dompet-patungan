@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, reactive } from 'vue';
 
 type User = {
     id: number;
@@ -125,6 +125,27 @@ function updateStatus(newStatus: string) {
     statusForm.patch(`/groups/${props.group.id}/status`, {
         onSuccess: () => {
             statusForm.reset();
+        },
+    });
+}
+
+const rejectReasons = reactive<Record<string, string>>({});
+
+function confirmPayment(paymentId: string) {
+    const form = useForm({});
+    form.patch(`/payments/${paymentId}/confirm`);
+}
+
+function rejectPayment(paymentId: string) {
+    const reason = rejectReasons[paymentId]?.trim();
+    if (!reason) return;
+
+    const form = useForm<{ rejection_reason: string }>({
+        rejection_reason: reason,
+    });
+    form.patch(`/payments/${paymentId}/reject`, {
+        onSuccess: () => {
+            delete rejectReasons[paymentId];
         },
     });
 }
@@ -269,24 +290,36 @@ function updateStatus(newStatus: string) {
                                     </div>
                                     <div
                                         v-if="payment.status === 'submitted'"
-                                        class="flex gap-2"
+                                        class="flex flex-col gap-2"
                                     >
-                                        <Link
-                                            :href="`/payments/${payment.id}/confirm`"
-                                            as="button"
-                                            class="rounded-lg bg-primary px-3 py-1 font-semibold text-primary-foreground"
-                                            method="patch"
+                                        <form
+                                            class="flex items-end gap-2"
+                                            @submit.prevent="confirmPayment(payment.id)"
                                         >
-                                            Confirm
-                                        </Link>
-                                        <Link
-                                            :href="`/payments/${payment.id}/reject`"
-                                            as="button"
-                                            class="rounded-lg border border-primary px-3 py-1 font-semibold text-primary"
-                                            method="patch"
+                                            <button
+                                                class="rounded-lg bg-primary px-3 py-1 font-semibold text-primary-foreground"
+                                                type="submit"
+                                            >
+                                                Confirm
+                                            </button>
+                                        </form>
+                                        <form
+                                            class="flex items-end gap-2"
+                                            @submit.prevent="rejectPayment(payment.id)"
                                         >
-                                            Reject
-                                        </Link>
+                                            <input
+                                                v-model="rejectReasons[payment.id]"
+                                                class="vh-input mt-0 h-[34px] text-xs"
+                                                placeholder="Alasan penolakan..."
+                                                required
+                                            />
+                                            <button
+                                                class="rounded-lg border border-primary px-3 py-1 font-semibold text-primary whitespace-nowrap"
+                                                type="submit"
+                                            >
+                                                Reject
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
