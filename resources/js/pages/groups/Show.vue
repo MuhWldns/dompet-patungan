@@ -22,6 +22,7 @@ type Expense = {
         amount: string;
         status: string;
         payment_method: string | null;
+        proof_path: string | null;
         rejection_reason: string | null;
         user: User;
     }>;
@@ -245,11 +246,27 @@ function updateStatus(newStatus: string) {
                                 <div
                                     class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between"
                                 >
-                                    <p class="text-muted-foreground">
-                                        {{ payment.user.name }} · Rp
-                                        {{ payment.amount }} ·
-                                        {{ payment.status }}
-                                    </p>
+                                    <div>
+                                        <p class="text-muted-foreground">
+                                            {{ payment.user.name }} · Rp
+                                            {{ payment.amount }} ·
+                                            {{ payment.status }}
+                                        </p>
+                                        <p
+                                            v-if="payment.payment_method"
+                                            class="text-xs text-muted-foreground"
+                                        >
+                                            Metode: {{ payment.payment_method }}
+                                        </p>
+                                        <a
+                                            v-if="payment.proof_path"
+                                            :href="`/storage/${payment.proof_path}`"
+                                            class="vh-link mt-1 inline-block text-xs"
+                                            target="_blank"
+                                        >
+                                            Lihat bukti transfer
+                                        </a>
+                                    </div>
                                     <div
                                         v-if="payment.status === 'submitted'"
                                         class="flex gap-2"
