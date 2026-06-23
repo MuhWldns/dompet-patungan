@@ -119,16 +119,7 @@ function submit() {
                     />
                 </label>
 
-                <label class="mt-4 block text-sm font-medium text-foreground">
-                    Target dana
-                    <input
-                        v-model="form.target_amount"
-                        class="vh-input"
-                        name="target_amount"
-                        type="number"
-                        min="0"
-                    />
-                </label>
+                <!-- Target dana disabled — not used in any business logic -->
 
                 <button
                     class="vh-primary-action mt-6"
