@@ -1,15 +1,12 @@
 <script setup lang="ts">
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
 </script>
 
 <template>
-    <div
-        class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
-    >
-        <AppLogoIcon
-            class="size-5 fill-current text-sidebar-primary-foreground"
-        />
-    </div>
+    <img
+        src="/logo_cuy.jpg"
+        alt="Dompet Patungan"
+        class="size-8 rounded-lg object-cover"
+    />
     <div class="ml-1 grid flex-1 text-left text-sm">
         <span class="mb-0.5 truncate font-heading leading-tight font-bold"
             >Dompet Patungan</span
