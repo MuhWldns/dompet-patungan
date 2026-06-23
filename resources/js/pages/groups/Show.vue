@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { computed, reactive } from 'vue';
+import { computed, reactive, ref } from 'vue';
 
 type User = {
     id: number;
@@ -130,6 +130,7 @@ function updateStatus(newStatus: string) {
 }
 
 const rejectReasons = reactive<Record<string, string>>({});
+const previewProof = ref<string | null>(null);
 
 function confirmPayment(paymentId: string) {
     const form = useForm({});
@@ -279,14 +280,14 @@ function rejectPayment(paymentId: string) {
                                         >
                                             Metode: {{ payment.payment_method }}
                                         </p>
-                                        <a
+                                        <button
                                             v-if="payment.proof_path"
-                                            :href="`/storage/${payment.proof_path}`"
-                                            class="vh-link mt-1 inline-block text-xs"
-                                            target="_blank"
+                                            class="vh-link mt-1 text-xs"
+                                            type="button"
+                                            @click="previewProof = payment.proof_path"
                                         >
                                             Lihat bukti transfer
-                                        </a>
+                                        </button>
                                     </div>
                                     <div
                                         v-if="payment.status === 'submitted'"
@@ -519,4 +520,31 @@ function rejectPayment(paymentId: string) {
             </form>
         </section>
     </main>
+
+    <!-- Proof Preview Modal -->
+    <Teleport to="body">
+        <div
+            v-if="previewProof"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+            @click.self="previewProof = null"
+        >
+            <div class="relative max-h-[90vh] max-w-[90vw] overflow-auto rounded-lg bg-white p-4 shadow-lg">
+                <button
+                    class="absolute right-2 top-2 rounded-full bg-black/60 p-1 text-white hover:bg-black"
+                    type="button"
+                    @click="previewProof = null"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+                <img
+                    v-if="previewProof"
+                    :src="'/storage/' + previewProof"
+                    alt="Bukti transfer"
+                    class="max-h-[85vh] rounded"
+                />
+            </div>
+        </div>
+    </Teleport>
 </template>
