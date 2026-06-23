@@ -247,13 +247,11 @@ function rejectPayment(paymentId: string) {
                             </button>
                             <button
                                 v-else-if="isAdmin"
-                                class="rounded-lg p-1 text-muted-foreground hover:text-destructive"
+                                class="vh-link text-xs text-destructive"
                                 type="button"
                                 @click="kickTarget = member"
                             >
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
+                                Kick
                             </button>
                         </div>
                     </li>
