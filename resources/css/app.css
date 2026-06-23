@@ -310,4 +310,12 @@
     .vh-chip-error {
         @apply bg-error/10 text-red-700 dark:text-red-300;
     }
+
+    .vh-chip-primary {
+        @apply bg-primary text-primary-foreground;
+    }
+
+    .vh-chip-muted {
+        @apply border border-border bg-background text-foreground;
+    }
 }
