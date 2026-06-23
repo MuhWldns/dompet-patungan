@@ -26,6 +26,22 @@ function submit() {
         onSuccess: () => form.reset(),
     });
 }
+
+const joinForm = useForm({
+    invite_code: '',
+});
+
+function submitJoin() {
+    const code = joinForm.invite_code.trim();
+    if (!code) return;
+
+    // Extract path from full URL or accept raw path: /groups/{id}/join/{token}
+    let path = code;
+    if (code.includes('://')) {
+        path = new URL(code).pathname;
+    }
+    window.location.href = path.startsWith('/') ? path : `/${path}`;
+}
 </script>
 
 <template>
@@ -46,6 +62,29 @@ function submit() {
                 </div>
             </div>
         </section>
+
+        <!-- Join via Invite Code -->
+        <form class="vh-card" @submit.prevent="submitJoin">
+            <h2 class="text-xl font-semibold text-foreground">Gabung grup</h2>
+            <p class="mt-1 text-sm text-muted-foreground">
+                Masukkan link invite atau kode undangan dari admin grup.
+            </p>
+            <div class="mt-4 flex gap-3">
+                <input
+                    v-model="joinForm.invite_code"
+                    class="vh-input mt-0 flex-1"
+                    name="invite_code"
+                    placeholder="Tempel link invite grup..."
+                />
+                <button
+                    class="vh-primary-action"
+                    :disabled="joinForm.processing || !joinForm.invite_code.trim()"
+                    type="submit"
+                >
+                    Gabung
+                </button>
+            </div>
+        </form>
 
         <section class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
             <div class="grid gap-4">
