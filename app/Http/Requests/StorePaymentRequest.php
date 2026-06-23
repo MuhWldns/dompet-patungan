@@ -19,7 +19,7 @@ class StorePaymentRequest extends FormRequest
     {
         return [
             'payment_method' => ['required', Rule::in(['transfer', 'cash', 'qris'])],
-            'proof' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'proof' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
         ];
     }
 }

@@ -95,10 +95,12 @@ test('rejected payments can be resubmitted', function () {
     [, , $payment, , $member] = createPaymentFixture();
     $payment->update(['status' => 'rejected', 'rejection_reason' => 'Wrong proof']);
 
+    $proof = Illuminate\Http\UploadedFile::fake()->image('proof.jpg');
     $response = $this
         ->actingAs($member)
         ->post(route('payments.pay', $payment), [
             'payment_method' => 'qris',
+            'proof' => $proof,
         ]);
 
     $response->assertRedirect(route('payments.index'));
