@@ -131,6 +131,24 @@ function updateStatus(newStatus: string) {
 
 const rejectReasons = reactive<Record<string, string>>({});
 const previewProof = ref<string | null>(null);
+const leaveTarget = ref<User | null>(null);
+const kickTarget = ref<User | null>(null);
+
+function doLeave() {
+    if (!leaveTarget.value) return;
+    const form = useForm({});
+    form.delete(`/groups/${props.group.id}/members/${leaveTarget.value.id}`, {
+        onSuccess: () => { leaveTarget.value = null; },
+    });
+}
+
+function doKick() {
+    if (!kickTarget.value) return;
+    const form = useForm({});
+    form.delete(`/groups/${props.group.id}/members/${kickTarget.value.id}`, {
+        onSuccess: () => { kickTarget.value = null; },
+    });
+}
 
 function confirmPayment(paymentId: string) {
     const form = useForm({});
@@ -215,21 +233,29 @@ function rejectPayment(paymentId: string) {
                                 {{ member.email }}
                             </p>
                         </div>
-                        <span class="vh-chip vh-chip-navy">
-                            {{ member.pivot?.role ?? 'member' }}
-                        </span>
-                        <Link
-                            v-if="isAdmin || member.id === $page.props.auth.user.id"
-                            :href="`/groups/${group.id}/members/${member.id}`"
-                            as="button"
-                            class="rounded-lg p-1 text-muted-foreground hover:text-destructive"
-                            method="delete"
-                            :confirm="member.id === $page.props.auth.user.id ? 'Yakin ingin keluar dari grup?' : 'Yakin ingin mengeluarkan anggota ini?'"
-                        >
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </Link>
+                        <div class="flex items-center gap-2">
+                            <span class="vh-chip vh-chip-navy">
+                                {{ member.pivot?.role ?? 'member' }}
+                            </span>
+                            <button
+                                v-if="member.id === $page.props.auth.user.id"
+                                class="vh-link text-xs text-destructive"
+                                type="button"
+                                @click="leaveTarget = member"
+                            >
+                                Leave
+                            </button>
+                            <button
+                                v-else-if="isAdmin"
+                                class="rounded-lg p-1 text-muted-foreground hover:text-destructive"
+                                type="button"
+                                @click="kickTarget = member"
+                            >
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -544,6 +570,70 @@ function rejectPayment(paymentId: string) {
                     alt="Bukti transfer"
                     class="max-h-[85vh] rounded"
                 />
+            </div>
+        </div>
+    </Teleport>
+
+    <!-- Leave Confirmation Modal -->
+    <Teleport to="body">
+        <div
+            v-if="leaveTarget"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+            @click.self="leaveTarget = null"
+        >
+            <div class="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg">
+                <h3 class="text-lg font-semibold text-foreground">Keluar dari grup?</h3>
+                <p class="mt-2 text-sm text-muted-foreground">
+                    Kamu akan keluar dari grup <strong>{{ group.name }}</strong>. Tindakan ini tidak bisa dibatalkan.
+                </p>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button
+                        class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground"
+                        type="button"
+                        @click="leaveTarget = null"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        class="rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground"
+                        type="button"
+                        @click="doLeave"
+                    >
+                        Keluar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </Teleport>
+
+    <!-- Kick Confirmation Modal -->
+    <Teleport to="body">
+        <div
+            v-if="kickTarget"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+            @click.self="kickTarget = null"
+        >
+            <div class="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg">
+                <h3 class="text-lg font-semibold text-foreground">Keluarkan anggota?</h3>
+                <p class="mt-2 text-sm text-muted-foreground">
+                    Kamu akan mengeluarkan <strong>{{ kickTarget.name }}</strong> dari grup <strong>{{ group.name }}</strong>.
+                </p>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button
+                        class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground"
+                        type="button"
+                        @click="kickTarget = null"
+                    >
+                        Batal
+                    </button>
+                    <button
+                        class="rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground"
+                        type="button"
+                        @click="doKick"
+                    >
+                        Keluarkan
+                    </button>
+                </div>
             </div>
         </div>
     </Teleport>
