@@ -3,1337 +3,879 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dompet Patungan — Blackbox Testing Documentation</title>
+<title>Blackbox Testing — Dompet Patungan</title>
 <style>
-  :root {
-    --navy: #0F172A;
-    --sage: #059669;
-    --slate: #64748B;
-    --bg: #F8FAFC;
-    --surface: #FFFFFF;
-    --border: #E2E8F0;
-    --success: #22C55E;
-    --warning: #EAB308;
-    --error: #EF4444;
-    --info: #0EA5E9;
-    --destructive: #EF4444;
-    --radius: 8px;
-    --shadow: 0 1px 3px rgba(15,23,42,0.04);
-    --shadow-md: 0 4px 16px rgba(15,23,42,0.07);
-    --font-heading: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    --font-body: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    --font-mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: var(--font-body);
-    font-size: 15px; line-height: 1.65; color: var(--navy);
-    background: var(--bg); padding: 0; counter-reset: tc;
-  }
-  .page { max-width: 1200px; margin: 0 auto; padding: 48px 24px 96px; }
-
-  /* Print */
-  @media print {
-    body { background: #fff; font-size: 12px; }
-    .page { max-width: 100%; padding: 20px 0; }
-    .toc, .topbar { page-break-after: always; }
-    .module { page-break-before: always; }
-    .tc-row { page-break-inside: avoid; }
-    nav, .back-to-top { display: none !important; }
-  }
-
-  /* Topbar */
-  .topbar {
-    background: var(--navy); color: #fff; padding: 32px 0; margin-bottom: 40px;
-    text-align: center; border-radius: 0 0 16px 16px;
-  }
-  .topbar h1 { font: 700 32px/1.2 var(--font-heading); letter-spacing: -0.02em; }
-  .topbar .meta { font-size: 14px; opacity: .7; margin-top: 6px; }
-  .topbar .badges { margin-top: 14px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-  .topbar .badge {
-    display: inline-block; padding: 4px 12px; border-radius: 99px;
-    font-size: 12px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase;
-  }
-  .badge-spec { background: var(--sage); color: #fff; }
-  .badge-modules { background: rgba(255,255,255,.15); color: #fff; }
-
-  /* Section headings */
-  h2 { font: 700 26px/1.25 var(--font-heading); color: var(--navy); margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--border); letter-spacing: -.01em; }
-  h3 { font: 600 20px/1.3 var(--font-heading); color: var(--navy); margin: 32px 0 12px; }
-  h4 { font: 600 16px/1.4 var(--font-heading); color: var(--navy); margin: 20px 0 8px; }
-
-  /* Tables */
-  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); margin: 16px 0 24px; }
-  table { width: 100%; border-collapse: collapse; min-width: 700px; }
-  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
-  th { background: var(--navy); color: #fff; font-size: 13px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; white-space: nowrap; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: #F1F5F9; }
-
-  /* Test case numbering */
-  .tc-id { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--sage); white-space: nowrap; }
-
-  /* Status pills */
-  .pill {
-    display: inline-block; padding: 2px 8px; border-radius: 4px;
-    font-size: 11px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; white-space: nowrap;
-  }
-  .pill-pos { background: #DCFCE7; color: #166534; }
-  .pill-neg { background: #FEE2E2; color: #991B1B; }
-  .pill-mid { background: #FEF9C3; color: #854D0E; }
-
-  /* Summary cards */
-  .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin: 16px 0 32px; }
-  .summary-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 20px; box-shadow: var(--shadow);
-  }
-  .summary-card .num { font: 700 32px/1.2 var(--font-heading); color: var(--navy); letter-spacing: -.02em; }
-  .summary-card .label { font-size: 13px; color: var(--slate); margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
-
-  /* Module header */
-  .module-header {
-    background: var(--navy); color: #fff; padding: 16px 24px; border-radius: var(--radius) var(--radius) 0 0;
-    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
-  }
-  .module-header .mod-num { font-size: 13px; opacity: .7; font-weight: 500; }
-  .module-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 32px; overflow: hidden; }
-  .module-body { padding: 20px 24px; }
-
-  /* TOC */
-  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); margin: 32px 0; }
-  .toc h3 { margin-top: 0; }
-  .toc ol { columns: 2; column-gap: 32px; padding-left: 20px; font-size: 14px; }
-  .toc li { margin-bottom: 6px; break-inside: avoid; }
-  .toc a { color: var(--sage); text-decoration: none; font-weight: 500; }
-  .toc a:hover { text-decoration: underline; }
-
-  /* Notes */
-  .note { background: #EFF6FF; border-left: 4px solid var(--info); padding: 12px 16px; border-radius: 0 var(--radius) var(--radius) 0; margin: 16px 0; font-size: 14px; }
-  .note strong { color: #0369A1; }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .page { padding: 24px 16px 64px; }
-    .toc ol { columns: 1; }
-    .topbar h1 { font-size: 24px; }
-    .summary-grid { grid-template-columns: 1fr 1fr; }
-  }
+  body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; font-size: 13px; color: #222; margin: 0; padding: 20px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; padding: 8px 12px; background: #0F172A; color: #fff; border-radius: 4px; }
+  .meta { color: #666; font-size: 12px; margin-bottom: 20px; }
+  .stats { margin: 8px 0 24px; font-size: 13px; color: #555; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 28px; }
+  th { background: #F1F5F9; border: 1px solid #CBD5E1; padding: 8px 6px; text-align: left; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+  td { border: 1px solid #CBD5E1; padding: 6px; vertical-align: top; font-size: 12px; }
+  tr:nth-child(even) td { background: #F8FAFC; }
+  .tc { font-weight: 700; width: 70px; white-space: nowrap; }
+  .pos { color: #16A34A; font-weight: 600; }
+  .neg { color: #DC2626; font-weight: 600; }
+  .act { background: #FFFBEB; color: #92400E; font-style: italic; }
+  .pass { color: #16A34A; font-weight: 700; }
+  .fail { color: #DC2626; font-weight: 700; }
+  @media print { body { font-size: 11px; } h2 { break-after: avoid; } table { break-inside: auto; } }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <h1>Dompet Patungan</h1>
-  <p class="meta">Blackbox Testing Documentation &middot; Version 1.0 &middot; 2026-06-23</p>
-  <div class="badges">
-    <span class="badge badge-spec">ISO/IEC 25010:2023</span>
-    <span class="badge badge-modules">8 Modules</span>
-    <span class="badge badge-modules">79 Test Cases</span>
-  </div>
-</div>
+<h1>Blackbox Testing Documentation</h1>
+<p class="meta">Dompet Patungan v1.0 &middot; 2026-06-23</p>
+<p class="stats">Total: <strong>8 Modules</strong> &middot; <strong>79 Test Cases</strong> &middot; Positive: 57 &middot; Negative: 22</p>
 
-<div class="page">
+<!-- ==================== MODULE 1: AUTH ==================== -->
+<h2>1. Authentication &amp; Registration</h2>
 
-<!-- ============================================================ -->
-<!-- DOCUMENT CONTROL -->
-<!-- ============================================================ -->
-<h2>Document Control</h2>
-<div class="table-wrap">
 <table>
-  <tr><th style="width:180px">Field</th><th>Value</th></tr>
-  <tr><td><strong>Document ID</strong></td><td>DP-BT-001</td></tr>
-  <tr><td><strong>Title</strong></td><td>Blackbox Testing Documentation — Dompet Patungan</td></tr>
-  <tr><td><strong>Version</strong></td><td>1.0</td></tr>
-  <tr><td><strong>Date</strong></td><td>2026-06-23</td></tr>
-  <tr><td><strong>Author</strong></td><td>QA Team</td></tr>
-  <tr><td><strong>Methodology</strong></td><td>Blackbox Testing (Equivalence Partitioning, Boundary Value Analysis, Decision Table Testing)</td></tr>
-  <tr><td><strong>Standard</strong></td><td>ISO/IEC 25010:2023 — Software Quality Model</td></tr>
-  <tr><td><strong>Test Basis</strong></td><td>Requirements specification, user stories, use cases, design documents</td></tr>
-</table>
-</div>
+<tr><th class="tc">Test Case</th><th>Scenario</th><th>Test Steps</th><th>Type</th><th>Expected Result</th><th>Actual Result</th><th>Status</th></tr>
 
-<!-- ============================================================ -->
-<!-- REVISION HISTORY -->
-<!-- ============================================================ -->
-<h2>Revision History</h2>
-<div class="table-wrap">
+<tr>
+  <td class="tc">TC-01</td>
+  <td>Register with valid data</td>
+  <td>1. Go to /register<br>2. Enter name: "Budi Santoso"<br>3. Enter email: "budi@example.com"<br>4. Password: "password123"<br>5. Confirm password<br>6. Click Register</td>
+  <td class="pos">Positive</td>
+  <td>Account created. Redirect to /dashboard. Role=user, is_active=true.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-02</td>
+  <td>Register with empty name</td>
+  <td>1. Go to /register<br>2. Leave name blank<br>3. Fill valid email + password<br>4. Click Register</td>
+  <td class="neg">Negative</td>
+  <td>Validation error: "The name field is required." Stay on /register.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-03</td>
+  <td>Register with duplicate email</td>
+  <td>1. Go to /register<br>2. Enter email already registered (budi@example.com)<br>3. Fill valid name + password<br>4. Click Register</td>
+  <td class="neg">Negative</td>
+  <td>Validation error: "The email has already been taken."</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-04</td>
+  <td>Register with mismatched password confirmation</td>
+  <td>1. Go to /register<br>2. Fill valid name + email<br>3. Password: "abc12345"<br>4. Confirm: "xyz98765"<br>5. Click Register</td>
+  <td class="neg">Negative</td>
+  <td>Validation error: password confirmation does not match.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-05</td>
+  <td>Register with short password (&lt;8 chars)</td>
+  <td>1. Go to /register<br>2. Fill valid name + email<br>3. Password: "12345"<br>4. Click Register</td>
+  <td class="neg">Negative</td>
+  <td>Validation error: "The password must be at least 8 characters."</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-06</td>
+  <td>Login with valid credentials</td>
+  <td>1. Go to /login<br>2. Email: "budi@example.com"<br>3. Password: "password123"<br>4. Click Login</td>
+  <td class="pos">Positive</td>
+  <td>Authenticated. Redirect to /dashboard. Header shows user avatar.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-07</td>
+  <td>Login with invalid password</td>
+  <td>1. Go to /login<br>2. Enter valid email<br>3. Enter wrong password<br>4. Click Login</td>
+  <td class="neg">Negative</td>
+  <td>Error: "These credentials do not match our records." Stay on /login.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-08</td>
+  <td>Login with inactive (deactivated) account</td>
+  <td>1. Admin deactivates user "Budi"<br>2. Budi attempts login with valid credentials</td>
+  <td class="neg">Negative</td>
+  <td>Logged out immediately. Redirect to /login. Cannot access auth pages.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-09</td>
+  <td>Login rate limit (5 attempts/min)</td>
+  <td>1. Submit wrong password 5 times in &lt;60s<br>2. Attempt 6th login</td>
+  <td class="neg">Negative</td>
+  <td>Rate-limited: "Too many login attempts." Must wait before retry.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-10</td>
+  <td>Logout</td>
+  <td>1. User logged in<br>2. Click avatar → "Log Out"</td>
+  <td class="pos">Positive</td>
+  <td>Session destroyed. Redirect to /. /dashboard inaccessible.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-11</td>
+  <td>Access auth-required page as guest</td>
+  <td>1. Not logged in<br>2. Navigate to /dashboard</td>
+  <td class="neg">Negative</td>
+  <td>Redirected to /login.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-12</td>
+  <td>Access login page while already authenticated</td>
+  <td>1. Logged in<br>2. Navigate to /login</td>
+  <td class="pos">Positive</td>
+  <td>Redirected to /dashboard (already logged in).</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+</table>
+
+<!-- ==================== MODULE 2: DASHBOARD ==================== -->
+<h2>2. Dashboard</h2>
+
 <table>
-  <tr><th>Version</th><th>Date</th><th>Author</th><th>Description</th></tr>
-  <tr><td>1.0</td><td>2026-06-23</td><td>QA Team</td><td>Initial release — full test suite for all 8 modules</td></tr>
+<tr><th class="tc">Test Case</th><th>Scenario</th><th>Test Steps</th><th>Type</th><th>Expected Result</th><th>Actual Result</th><th>Status</th></tr>
+
+<tr>
+  <td class="tc">TC-13</td>
+  <td>Dashboard shows summary for regular user</td>
+  <td>1. Login as user with 2 groups, 1 pending payment, 3 unread notifications<br>2. Go to /dashboard</td>
+  <td class="pos">Positive</td>
+  <td>3 stat cards visible. Recent groups (max 5). Notifications (max 8).</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-14</td>
+  <td>Dashboard zero state (new user)</td>
+  <td>1. Login as new user with no groups/payments/notifications<br>2. Go to /dashboard</td>
+  <td class="pos">Positive</td>
+  <td>All stats = 0. "Belum ada grup." shown. "Tidak ada notifikasi." shown.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-15</td>
+  <td>System admin redirected from dashboard</td>
+  <td>1. Login as admin@test.com<br>2. Go to /dashboard</td>
+  <td class="pos">Positive</td>
+  <td>Redirected to /admin/stats. Dashboard never renders.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-16</td>
+  <td>Filter notifications by "Belum dibaca"</td>
+  <td>1. User has 2 unread + 1 read<br>2. Click "Belum dibaca" chip</td>
+  <td class="pos">Positive</td>
+  <td>URL: /dashboard?filter=unread. Only 2 unread shown. Chip highlighted.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-17</td>
+  <td>Filter notifications by type "Tagihan"</td>
+  <td>1. User has 1 bill.created + 2 other<br>2. Click "Tagihan" chip</td>
+  <td class="pos">Positive</td>
+  <td>URL: /dashboard?filter=bill.created. Only bill.created shown.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-18</td>
+  <td>Reset filter — "Semua" chip</td>
+  <td>1. Currently filtered by "Belum dibaca"<br>2. Click "Semua" chip</td>
+  <td class="pos">Positive</td>
+  <td>URL: /dashboard. All notifications shown. "Semua" highlighted.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-19</td>
+  <td>Mark all notifications as read</td>
+  <td>1. User has 5 unread notifications<br>2. Click "Tandai semua dibaca"</td>
+  <td class="pos">Positive</td>
+  <td>All marked read. Unread count = 0. Cards opacity reduced.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
 </table>
-</div>
 
-<!-- ============================================================ -->
-<!-- TABLE OF CONTENTS -->
-<!-- ============================================================ -->
-<div class="toc">
-<h3>Table of Contents</h3>
-<ol>
-  <li><a href="#m1">Module 1: Authentication &amp; Registration</a></li>
-  <li><a href="#m2">Module 2: Dashboard</a></li>
-  <li><a href="#m3">Module 3: Groups</a></li>
-  <li><a href="#m4">Module 4: Payments</a></li>
-  <li><a href="#m5">Module 5: Settlements</a></li>
-  <li><a href="#m6">Module 6: Notifications</a></li>
-  <li><a href="#m7">Module 7: Settings &amp; Profile</a></li>
-  <li><a href="#m8">Module 8: Admin Panel</a></li>
-  <li><a href="#appendix">Appendix: Traceability Matrix</a></li>
-</ol>
-</div>
+<!-- ==================== MODULE 3: GROUPS ==================== -->
+<h2>3. Groups</h2>
 
-<!-- ============================================================ -->
-<!-- TEST PLAN SUMMARY -->
-<!-- ============================================================ -->
-<h2>Test Plan</h2>
-
-<h3>1. Introduction</h3>
-<p>This document defines the <strong>blackbox testing strategy</strong> for Dompet Patungan, a group expense-splitting and settlement management web application. Testing is conducted without knowledge of internal code structure; test cases are derived exclusively from functional requirements, user interface specifications, and business rules.</p>
-
-<h3>2. Test Objectives</h3>
-<ul style="padding-left:24px; line-height:2">
-  <li>Verify that all functional requirements are implemented correctly</li>
-  <li>Ensure proper access control and authorization for each user role</li>
-  <li>Validate input handling, error messages, and boundary conditions</li>
-  <li>Confirm that business rules (settlement calculation, notification delivery, group lifecycle) behave as specified</li>
-  <li>Identify defects before production release</li>
-</ul>
-
-<h3>3. Scope</h3>
-<div class="summary-grid">
-  <div class="summary-card"><div class="num">8</div><div class="label">Modules</div></div>
-  <div class="summary-card"><div class="num">31</div><div class="label">Routes / Endpoints</div></div>
-  <div class="summary-card"><div class="num">79</div><div class="label">Test Cases</div></div>
-  <div class="summary-card"><div class="num">3</div><div class="label">User Roles</div></div>
-</div>
-
-<h4>In Scope</h4>
-<ul style="padding-left:24px; line-height:2">
-  <li>Functional testing of all 8 modules</li>
-  <li>Authorization (role-based access control)</li>
-  <li>Input validation and error handling</li>
-  <li>Business rule verification</li>
-  <li>UI workflow validation</li>
-</ul>
-
-<h4>Out of Scope</h4>
-<ul style="padding-left:24px; line-height:2">
-  <li>Performance / load testing</li>
-  <li>Security penetration testing</li>
-  <li>Unit testing (covered separately by Pest PHP automated tests)</li>
-  <li>Cross-browser compatibility testing</li>
-  <li>API contract testing</li>
-</ul>
-
-<h3>4. Test Environment</h3>
-<div class="table-wrap">
 <table>
-  <tr><th style="width:200px">Component</th><th>Specification</th></tr>
-  <tr><td>Application URL</td><td><code>http://localhost:8000</code></td></tr>
-  <tr><td>Backend</td><td>Laravel 13.7 / PHP 8.3+</td></tr>
-  <tr><td>Database</td><td>SQLite (test) / PostgreSQL (production)</td></tr>
-  <tr><td>Browser</td><td>Latest Chrome / Firefox / Edge</td></tr>
-  <tr><td>Test Data</td><td>Seeded test users: admin@test.com (system admin), regular users, test groups with expenses &amp; payments</td></tr>
-</table>
-</div>
+<tr><th class="tc">Test Case</th><th>Scenario</th><th>Test Steps</th><th>Type</th><th>Expected Result</th><th>Actual Result</th><th>Status</th></tr>
 
-<h3>5. Test Data</h3>
-<div class="table-wrap">
+<tr>
+  <td class="tc">TC-20</td>
+  <td>Create group with valid data</td>
+  <td>1. Go to /groups<br>2. Name: "Liburan Bali"<br>3. Description: "Trip Agustus"<br>4. Target: "5000000"<br>5. Click "Simpan grup"</td>
+  <td class="pos">Positive</td>
+  <td>Group created. Redirect to /groups/{id}. Creator = admin. Invite URL shown.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-21</td>
+  <td>Create group with empty name</td>
+  <td>1. Go to /groups<br>2. Leave name blank<br>3. Fill description<br>4. Click "Simpan grup"</td>
+  <td class="neg">Negative</td>
+  <td>Validation error: "The name field is required." Form preserved.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-22</td>
+  <td>Create group with negative target amount</td>
+  <td>1. Go to /groups<br>2. Fill name<br>3. Target amount: "-1000"<br>4. Click "Simpan grup"</td>
+  <td class="neg">Negative</td>
+  <td>Validation error: target_amount must be ≥ 0.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-23</td>
+  <td>View group list (user's groups)</td>
+  <td>1. User is member of 3 groups<br>2. Go to /groups</td>
+  <td class="pos">Positive</td>
+  <td>3 group cards: name, description, status chip, member count, expense count.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-24</td>
+  <td>View empty group list</td>
+  <td>1. New user with no groups<br>2. Go to /groups</td>
+  <td class="pos">Positive</td>
+  <td>"Belum ada grup." message. "Buat grup" form visible.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-25</td>
+  <td>Member views group detail</td>
+  <td>1. User is member of "Liburan Bali"<br>2. Click group card → /groups/{id}</td>
+  <td class="pos">Positive</td>
+  <td>Group name, status, description, member list (name+email+role), expense list. Invite link if admin.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-26</td>
+  <td>Non-member cannot view group</td>
+  <td>1. User NOT member of target group<br>2. Navigate to /groups/{id}</td>
+  <td class="neg">Negative</td>
+  <td>HTTP 403 Forbidden.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-27</td>
+  <td>Join group with valid invite token</td>
+  <td>1. Non-member opens invite link /groups/{id}/join/{token}<br>2. Review preview<br>3. Click join</td>
+  <td class="pos">Positive</td>
+  <td>User added as member (role=member). Redirect to /groups/{id}. Visible in member list.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-28</td>
+  <td>Join with invalid token</td>
+  <td>1. Navigate to /groups/{id}/join/wrong-token</td>
+  <td class="neg">Negative</td>
+  <td>HTTP 404 Not Found.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-29</td>
+  <td>Already-member sees join preview</td>
+  <td>1. Existing member opens own invite link</td>
+  <td class="pos">Positive</td>
+  <td>Preview shows isMember=true. Link to /groups/{id} instead of join button.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-30</td>
+  <td>Admin kicks a member</td>
+  <td>1. Admin opens group detail<br>2. Click ✕ on member<br>3. Confirm "Yakin ingin mengeluarkan?"</td>
+  <td class="pos">Positive</td>
+  <td>Member removed. "member.removed" notification sent to kicked member. Admin stays.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-31</td>
+  <td>Non-admin cannot kick another member</td>
+  <td>1. Member1 (non-admin) sends DELETE to /groups/{id}/members/{member2Id}</td>
+  <td class="neg">Negative</td>
+  <td>HTTP 403 Forbidden. Member2 NOT removed.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-32</td>
+  <td>Member self-leave (keluar grup)</td>
+  <td>1. Member clicks ✕ on themselves<br>2. Confirm "Yakin ingin keluar?"</td>
+  <td class="pos">Positive</td>
+  <td>Member removed. "member.left" notification to remaining members. Redirect to /groups.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-33</td>
+  <td>Last admin leaving promotes oldest member</td>
+  <td>1. Admin (only admin) + Member1 (older) + Member2 (newer)<br>2. Admin clicks ✕ on themselves</td>
+  <td class="pos">Positive</td>
+  <td>Admin removed. Member1 (oldest) promoted to admin. Group not closed.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-34</td>
+  <td>Last member leaving closes group</td>
+  <td>1. Only 1 admin in group<br>2. Admin clicks ✕ on themselves</td>
+  <td class="pos">Positive</td>
+  <td>Member removed. Group status auto-changed to "closed".</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-35</td>
+  <td>Outsider (non-member) cannot access remove route</td>
+  <td>1. Outsider sends DELETE to /groups/{id}/members/{userId}</td>
+  <td class="neg">Negative</td>
+  <td>HTTP 403 Forbidden. No changes.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-36</td>
+  <td>Admin changes group status to "settled"</td>
+  <td>1. Admin in active group<br>2. Select "Settled" from status dropdown</td>
+  <td class="pos">Positive</td>
+  <td>Status changed. "group.status_changed" notification to all members.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-37</td>
+  <td>Cannot reopen a closed group</td>
+  <td>1. Group status = "closed"<br>2. Admin selects "Active" from dropdown</td>
+  <td class="neg">Negative</td>
+  <td>Error: "Grup yang sudah ditutup tidak dapat dibuka kembali." Status stays "closed".</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+</table>
+
+<!-- ==================== MODULE 4: PAYMENTS ==================== -->
+<h2>4. Payments</h2>
+
 <table>
-  <tr><th>Entity</th><th>ID / Value</th><th>Notes</th></tr>
-  <tr><td>System Admin</td><td>admin@test.com / admin</td><td>role=system_admin, is_active=true</td></tr>
-  <tr><td>Test User</td><td>test@example.com</td><td>role=user, is_active=true (seeded)</td></tr>
-  <tr><td>Regular User</td><td>sintaacantik980@gmail.com</td><td>role=user, is_active=true</td></tr>
-</table>
-</div>
+<tr><th class="tc">Test Case</th><th>Scenario</th><th>Test Steps</th><th>Type</th><th>Expected Result</th><th>Actual Result</th><th>Status</th></tr>
 
-<h3>6. Severity Classification</h3>
-<div class="table-wrap">
+<tr>
+  <td class="tc">TC-38</td>
+  <td>View own payment list</td>
+  <td>1. User has 3 payments across 2 groups<br>2. Go to /payments</td>
+  <td class="pos">Positive</td>
+  <td>All 3 payments: expense title, amount, group name, status, action buttons.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-39</td>
+  <td>Empty payment list</td>
+  <td>1. New user with no bills<br>2. Go to /payments</td>
+  <td class="pos">Positive</td>
+  <td>Empty state message. No payment cards.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-40</td>
+  <td>Submit payment with proof (pending → submitted)</td>
+  <td>1. User with pending payment<br>2. Click "Bayar"<br>3. Select method: "Transfer"<br>4. Upload proof image<br>5. Submit</td>
+  <td class="pos">Positive</td>
+  <td>Status = "submitted". paid_at set. Proof stored. "payment.submitted" notification sent to expense payer.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-41</td>
+  <td>Re-submit rejected payment</td>
+  <td>1. Payment status = rejected<br>2. Click "Bayar Ulang"<br>3. Upload new proof<br>4. Submit</td>
+  <td class="pos">Positive</td>
+  <td>Status = "submitted". rejection_reason cleared. New proof uploaded.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-42</td>
+  <td>Submit payment without proof upload</td>
+  <td>1. Click "Bayar"<br>2. Select method, no file<br>3. Submit</td>
+  <td class="neg">Negative</td>
+  <td>Validation error: proof file required. Payment stays pending.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-43</td>
+  <td>Non-owner cannot submit payment</td>
+  <td>1. User-B's payment; User-A sends POST to /payments/{id}/pay</td>
+  <td class="neg">Negative</td>
+  <td>HTTP 403 Forbidden. Payment unchanged.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-44</td>
+  <td>Admin confirms submitted payment</td>
+  <td>1. Group admin on group detail<br>2. Click "Confirm" on submitted payment</td>
+  <td class="pos">Positive</td>
+  <td>Status = "confirmed". "payment.confirmed" notification sent to payer.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-45</td>
+  <td>Admin rejects payment with reason</td>
+  <td>1. Group admin clicks "Reject"<br>2. Enter reason: "Bukti tidak jelas"<br>3. Confirm</td>
+  <td class="pos">Positive</td>
+  <td>Status = "rejected". rejection_reason stored. "payment.rejected" notification sent.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-46</td>
+  <td>Reject payment without reason</td>
+  <td>1. Group admin clicks "Reject"<br>2. Leave reason blank<br>3. Confirm</td>
+  <td class="neg">Negative</td>
+  <td>Validation error: "The rejection reason field is required." Payment stays submitted.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-47</td>
+  <td>Non-admin cannot confirm/reject</td>
+  <td>1. Regular member sends PATCH to /payments/{id}/confirm</td>
+  <td class="neg">Negative</td>
+  <td>HTTP 403 Forbidden.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+</table>
+
+<!-- ==================== MODULE 5: SETTLEMENTS ==================== -->
+<h2>5. Settlements</h2>
+
 <table>
-  <tr><th>Severity</th><th>Definition</th><th>Example</th></tr>
-  <tr><td><span class="pill pill-neg">Blocker</span></td><td>System crash, data loss, security breach; no workaround</td><td>Non-admin can delete any group; unauthenticated access to admin panel</td></tr>
-  <tr><td><span class="pill pill-neg">Critical</span></td><td>Core feature broken, major business rule violated</td><td>Settlement calculation incorrect; payment confirmation fails silently</td></tr>
-  <tr><td><span class="pill pill-mid">Major</span></td><td>Feature partially broken, workaround exists</td><td>Notification not sent for specific action; filter returns wrong results</td></tr>
-  <tr><td><span class="pill pill-mid">Minor</span></td><td>Cosmetic, UI alignment, non-critical workflow issue</td><td>Wrong label text; button misaligned on mobile</td></tr>
-  <tr><td><span class="pill pill-pos">Trivial</span></td><td>Typography, spacing, suggestion-level enhancement</td><td>Extra whitespace; inconsistent capitalization</td></tr>
-</table>
-</div>
+<tr><th class="tc">Test Case</th><th>Scenario</th><th>Test Steps</th><th>Type</th><th>Expected Result</th><th>Actual Result</th><th>Status</th></tr>
 
-<h3>7. Test Case Priority</h3>
-<div class="table-wrap">
+<tr>
+  <td class="tc">TC-48</td>
+  <td>Admin generates settlement</td>
+  <td>1. Group has expenses + confirmed payments<br>2. Admin goes to /settlements/{groupId}<br>3. Click "Generate Settlement"</td>
+  <td class="pos">Positive</td>
+  <td>Settlement created. debt_details shows transfer instructions. "settlement.generated" notification to all.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-49</td>
+  <td>Member views settlement</td>
+  <td>1. Settlement exists; user is member<br>2. Go to /settlements/{groupId}</td>
+  <td class="pos">Positive</td>
+  <td>Latest settlement with debtor→creditor transfers and amounts. Group info visible.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-50</td>
+  <td>Non-member cannot view settlement</td>
+  <td>1. User NOT in group<br>2. Navigate to /settlements/{groupId}</td>
+  <td class="neg">Negative</td>
+  <td>HTTP 403 Forbidden.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-51</td>
+  <td>Non-admin cannot generate settlement</td>
+  <td>1. Regular member sends POST to /settlements/generate/{groupId}</td>
+  <td class="neg">Negative</td>
+  <td>HTTP 403 Forbidden. No settlement created.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-52</td>
+  <td>Settlement calculation: equal split is accurate</td>
+  <td>1. Group of 2: Admin paid 100k, split equally, Member paid<br>2. Admin generates settlement</td>
+  <td class="pos">Positive</td>
+  <td>Transfer list is minimal. If all settled, net = 0. No redundant transfers.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-53</td>
+  <td>Settlement when all debts resolved</td>
+  <td>1. All payments confirmed, no outstanding balances<br>2. Admin generates settlement</td>
+  <td class="pos">Positive</td>
+  <td>debt_details = empty array []. No transfers needed.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+</table>
+
+<!-- ==================== MODULE 6: NOTIFICATIONS ==================== -->
+<h2>6. Notifications</h2>
+
 <table>
-  <tr><th>Priority</th><th>Definition</th><th>Execution</th></tr>
-  <tr><td><span class="pill pill-neg">P0 — Must</span></td><td>Core functionality; must pass before any release</td><td>Every build</td></tr>
-  <tr><td><span class="pill pill-mid">P1 — Should</span></td><td>Important flows; should pass for release</td><td>Every sprint</td></tr>
-  <tr><td><span class="pill pill-pos">P2 — Could</span></td><td>Edge cases, nice-to-have validation</td><td>Regression cycles</td></tr>
+<tr><th class="tc">Test Case</th><th>Scenario</th><th>Test Steps</th><th>Type</th><th>Expected Result</th><th>Actual Result</th><th>Status</th></tr>
+
+<tr>
+  <td class="tc">TC-54</td>
+  <td>Paginated notification list</td>
+  <td>1. User has 20+ notifications<br>2. Go to /notifications</td>
+  <td class="pos">Positive</td>
+  <td>15 per page, pagination links. Latest first. Message, type, "Buka" link, "Tandai dibaca".</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-55</td>
+  <td>Filter notifications by unread</td>
+  <td>1. User has 2 unread + 1 read<br>2. Go to /notifications?filter=unread</td>
+  <td class="pos">Positive</td>
+  <td>Only 2 unread shown. Read notification absent.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-56</td>
+  <td>Filter notifications by type</td>
+  <td>1. User has 1 bill.created + 2 payment.submitted<br>2. Go to /notifications?filter=payment.submitted</td>
+  <td class="pos">Positive</td>
+  <td>Only payment.submitted notifications shown.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-57</td>
+  <td>Mark single notification as read</td>
+  <td>1. Unread notification exists<br>2. Click "Tandai dibaca"</td>
+  <td class="pos">Positive</td>
+  <td>PATCH sent. read_at set. Card opacity reduced. "Tandai dibaca" button hidden.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-58</td>
+  <td>Mark all notifications as read</td>
+  <td>1. User has 5 unread<br>2. Click "Tandai semua dibaca"</td>
+  <td class="pos">Positive</td>
+  <td>All 5 marked read. Unread count = 0.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-59</td>
+  <td>Cannot mark another user's notification</td>
+  <td>1. User-A's notification; User-B sends PATCH to /notifications/{id}/read</td>
+  <td class="neg">Negative</td>
+  <td>HTTP 403 Forbidden. Notification unchanged.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-60</td>
+  <td>Bell badge shows unread count</td>
+  <td>1. User has 3 unread<br>2. Observe header bell icon</td>
+  <td class="pos">Positive</td>
+  <td>Red badge shows "3". GET /notifications/unread-count → {"count":3}.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-61</td>
+  <td>Bell badge "9+" for 10+ unread</td>
+  <td>1. User has 12 unread<br>2. Observe header bell icon</td>
+  <td class="pos">Positive</td>
+  <td>Red badge shows "9+".</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-62</td>
+  <td>No badge when 0 unread</td>
+  <td>1. User has 0 unread<br>2. Observe header bell icon</td>
+  <td class="pos">Positive</td>
+  <td>No red badge visible. Bell icon only.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
 </table>
-</div>
 
-<!-- ============================================================ -->
-<!-- MODULE 1: AUTH -->
-<!-- ============================================================ -->
-<div class="module-wrap" id="m1">
-<div class="module-header">
-  <h3 style="margin:0;color:#fff;border:0;padding:0">Module 1: Authentication &amp; Registration</h3>
-  <span class="mod-num">Routes: 5 &middot; Test Cases: 12</span>
-</div>
-<div class="module-body">
+<!-- ==================== MODULE 7: SETTINGS ==================== -->
+<h2>7. Settings &amp; Profile</h2>
 
-<h4>1.1 Test Scenario: User Registration</h4>
-<p>Verify that new users can create accounts with valid data, and the system properly rejects invalid or duplicate registrations.</p>
-<div class="table-wrap">
 <table>
-  <thead>
-    <tr>
-      <th style="width:80px">Case ID</th>
-      <th style="width:140px">Scenario</th>
-      <th>Precondition</th>
-      <th>Test Steps</th>
-      <th>Expected Result</th>
-      <th style="width:70px">Priority</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">AUTH-001</td>
-      <td>Register with valid data</td>
-      <td>User is on <code>/register</code> page; logged out</td>
-      <td>1. Enter name: "Budi Santoso"<br>2. Enter email: "budi@example.com"<br>3. Enter password: "password123"<br>4. Enter confirm password: "password123"<br>5. Click "Register"</td>
-      <td>Account created. Redirected to <code>/dashboard</code>. User role = <code>user</code>, is_active = true.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">AUTH-002</td>
-      <td>Register with empty name</td>
-      <td>On <code>/register</code>; logged out</td>
-      <td>1. Leave name blank<br>2. Fill valid email + password + confirm<br>3. Click "Register"</td>
-      <td>Validation error: "The name field is required." Stay on register page.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">AUTH-003</td>
-      <td>Register with duplicate email</td>
-      <td>User "budi@example.com" already exists</td>
-      <td>1. Enter name: "Budi Clone"<br>2. Enter email: "budi@example.com"<br>3. Fill valid password + confirm<br>4. Click "Register"</td>
-      <td>Validation error: "The email has already been taken." Stay on register page.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">AUTH-004</td>
-      <td>Register with mismatched passwords</td>
-      <td>On <code>/register</code>; logged out</td>
-      <td>1. Fill valid name + email<br>2. Enter password: "abc123"<br>3. Enter confirm: "xyz789"<br>4. Click "Register"</td>
-      <td>Validation error: password confirmation mismatch. Account not created.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">AUTH-005</td>
-      <td>Register with short password (&lt;8 chars)</td>
-      <td>On <code>/register</code>; logged out</td>
-      <td>1. Fill valid name + email<br>2. Enter password: "12345"<br>3. Click "Register"</td>
-      <td>Validation error: "The password must be at least 8 characters."</td>
-      <td><span class="pill pill-pos">P2</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
+<tr><th class="tc">Test Case</th><th>Scenario</th><th>Test Steps</th><th>Type</th><th>Expected Result</th><th>Actual Result</th><th>Status</th></tr>
 
-<h4>1.2 Test Scenario: User Login</h4>
-<div class="table-wrap">
+<tr>
+  <td class="tc">TC-63</td>
+  <td>Update profile name</td>
+  <td>1. Go to /settings/profile<br>2. Change name to "Budi Update"<br>3. Save</td>
+  <td class="pos">Positive</td>
+  <td>Name updated. Toast: "Profile updated."</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-64</td>
+  <td>Update email (resets verification)</td>
+  <td>1. Go to /settings/profile<br>2. Change email to "new@test.com"<br>3. Save</td>
+  <td class="pos">Positive</td>
+  <td>Email updated. email_verified_at = null (re-verification required).</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-65</td>
+  <td>Delete account</td>
+  <td>1. Go to /settings/profile<br>2. Click "Delete Account"<br>3. Confirm</td>
+  <td class="pos">Positive</td>
+  <td>User deleted. Session destroyed. Redirect to /.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-66</td>
+  <td>Change password successfully</td>
+  <td>1. Go to /settings/security<br>2. Enter current password<br>3. Enter new password + confirm<br>4. Save</td>
+  <td class="pos">Positive</td>
+  <td>Password changed. Toast: "Password updated."</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-67</td>
+  <td>Wrong current password</td>
+  <td>1. Go to /settings/security<br>2. Enter wrong current password<br>3. Enter valid new password<br>4. Save</td>
+  <td class="neg">Negative</td>
+  <td>Error: "The provided password does not match your current password."</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-68</td>
+  <td>Password change rate limit (6/min)</td>
+  <td>1. Attempt 6+ password changes in &lt;60s</td>
+  <td class="neg">Negative</td>
+  <td>Throttled. Must wait before next attempt.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-69</td>
+  <td>View appearance settings page</td>
+  <td>1. Go to /settings/appearance</td>
+  <td class="pos">Positive</td>
+  <td>Appearance page rendered with theme toggle.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-70</td>
+  <td>Toggle dark/light mode</td>
+  <td>1. On appearance page<br>2. Toggle theme switch</td>
+  <td class="pos">Positive</td>
+  <td>Theme changes and persists across pages.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-71</td>
+  <td>Guest cannot access settings</td>
+  <td>1. Not logged in<br>2. Go to /settings/profile</td>
+  <td class="neg">Negative</td>
+  <td>Redirected to /login.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+</table>
+
+<!-- ==================== MODULE 8: ADMIN ==================== -->
+<h2>8. Admin Panel</h2>
+
 <table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">AUTH-006</td>
-      <td>Login with valid credentials</td>
-      <td>Registered user exists; logged out</td>
-      <td>1. Enter email: "budi@example.com"<br>2. Enter password: "password123"<br>3. Click "Login"</td>
-      <td>Authenticated. Redirected to <code>/dashboard</code>. Header shows user avatar.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">AUTH-007</td>
-      <td>Login with invalid password</td>
-      <td>Registered user exists; logged out</td>
-      <td>1. Enter valid email<br>2. Enter wrong password<br>3. Click "Login"</td>
-      <td>Error: "These credentials do not match our records." Stay on login page.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">AUTH-008</td>
-      <td>Login with inactive account</td>
-      <td>User with is_active=false exists</td>
-      <td>1. Enter inactive user's email + correct password<br>2. Click "Login"</td>
-      <td>Logged out immediately. Redirected to <code>/login</code>. Cannot access any auth page.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">AUTH-009</td>
-      <td>Login rate limiting (5 attempts/min)</td>
-      <td>Registered user exists</td>
-      <td>1. Submit wrong password 5 times in &lt;60s<br>2. Attempt 6th login</td>
-      <td>Rate-limited. Error: "Too many login attempts." Must wait before retry.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-  </tbody>
+<tr><th class="tc">Test Case</th><th>Scenario</th><th>Test Steps</th><th>Type</th><th>Expected Result</th><th>Actual Result</th><th>Status</th></tr>
+
+<tr>
+  <td class="tc">TC-72</td>
+  <td>System admin accesses admin panel</td>
+  <td>1. Login as admin@test.com<br>2. Go to /admin/stats</td>
+  <td class="pos">Positive</td>
+  <td>Stats dashboard with platform-wide metrics. Nav shows admin menu items.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-73</td>
+  <td>Regular user cannot access admin panel</td>
+  <td>1. Login as regular user<br>2. Go to /admin/users</td>
+  <td class="neg">Negative</td>
+  <td>HTTP 403 Forbidden.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-74</td>
+  <td>Guest cannot access admin panel</td>
+  <td>1. Not logged in<br>2. Go to /admin/users</td>
+  <td class="neg">Negative</td>
+  <td>Redirected to /login.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-75</td>
+  <td>View all users (user management)</td>
+  <td>1. System admin<br>2. Go to /admin/users</td>
+  <td class="pos">Positive</td>
+  <td>Paginated (20/page). Shows: id, name, email, role, is_active, created_at. Summary counts.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-76</td>
+  <td>Deactivate a user</td>
+  <td>1. System admin on /admin/users<br>2. Click toggle/deactivate on target user</td>
+  <td class="pos">Positive</td>
+  <td>User is_active = false. Target user cannot access auth pages (redirected to /login).</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-77</td>
+  <td>Admin cannot deactivate themselves</td>
+  <td>1. System admin sends PATCH to /admin/users/{selfId}/status</td>
+  <td class="neg">Negative</td>
+  <td>HTTP 422 Unprocessable. Own status unchanged.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-78</td>
+  <td>View all groups (group monitoring)</td>
+  <td>1. System admin<br>2. Go to /admin/groups</td>
+  <td class="pos">Positive</td>
+  <td>Paginated (20/page). Creator, member/expense/settlement counts, status. Summary: total, active, settled, closed.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
+
+<tr>
+  <td class="tc">TC-79</td>
+  <td>View platform stats (aggregate, no private data)</td>
+  <td>1. System admin<br>2. Go to /admin/stats</td>
+  <td class="pos">Positive</td>
+  <td>User counts, group counts by status, total expenses value, payment stats. No expense titles visible.</td>
+  <td class="act">—</td>
+  <td>—</td>
+</tr>
 </table>
-</div>
 
-<h4>1.3 Test Scenario: Logout</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">AUTH-010</td>
-      <td>Logout as authenticated user</td>
-      <td>User logged in</td>
-      <td>1. Click user avatar<br>2. Click "Log Out"</td>
-      <td>Session destroyed. Redirected to <code>/</code> (welcome page). Cannot access <code>/dashboard</code>.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">AUTH-011</td>
-      <td>Access auth-required page as guest</td>
-      <td>Not logged in</td>
-      <td>1. Navigate directly to <code>/dashboard</code></td>
-      <td>Redirected to <code>/login</code>.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">AUTH-012</td>
-      <td>Access login page while authenticated</td>
-      <td>User logged in</td>
-      <td>1. Navigate to <code>/login</code></td>
-      <td>Redirected to <code>/dashboard</code> (already logged in).</td>
-      <td><span class="pill pill-pos">P2</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
+<p style="text-align:center; color:#888; margin-top:32px; font-size:12px;">&copy; 2026 Dompet Patungan &middot; Blackbox Testing v1.0</p>
 
-</div></div><!-- /Module 1 -->
-
-<!-- ============================================================ -->
-<!-- MODULE 2: DASHBOARD -->
-<!-- ============================================================ -->
-<div class="module-wrap" id="m2">
-<div class="module-header">
-  <h3 style="margin:0;color:#fff;border:0;padding:0">Module 2: Dashboard</h3>
-  <span class="mod-num">Routes: 1 &middot; Test Cases: 7</span>
-</div>
-<div class="module-body">
-
-<h4>2.1 Test Scenario: Dashboard Display</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">DASH-001</td>
-      <td>Dashboard shows user summary</td>
-      <td>User logged in, member of 2 groups, 1 pending payment, 3 unread notifications</td>
-      <td>1. Navigate to <code>/dashboard</code></td>
-      <td>3 stat cards visible: Groups=2, Pending Payments=1, Unread Notifications=3. Recent groups (max 5) listed. Notifications (max 8) listed.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">DASH-002</td>
-      <td>Dashboard shows zero state</td>
-      <td>New user with no groups, no payments, no notifications</td>
-      <td>1. Navigate to <code>/dashboard</code></td>
-      <td>All stats = 0. "Belum ada grup." shown for recent groups. "Tidak ada notifikasi." shown.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">DASH-003</td>
-      <td>System admin redirected from dashboard</td>
-      <td>Logged in as system_admin (admin@test.com)</td>
-      <td>1. Navigate to <code>/dashboard</code></td>
-      <td>Redirected to <code>/admin/stats</code>. Dashboard never renders.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<h4>2.2 Test Scenario: Notification Filtering on Dashboard</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">DASH-004</td>
-      <td>Filter by "Belum dibaca"</td>
-      <td>User has 2 unread + 1 read notification</td>
-      <td>1. Click filter chip "Belum dibaca"<br>2. Observe list</td>
-      <td>URL becomes <code>/dashboard?filter=unread</code>. Only 2 unread shown. Filter chip highlighted.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">DASH-005</td>
-      <td>Filter by type "Tagihan"</td>
-      <td>User has 1 bill.created + 2 payment.submitted notifications</td>
-      <td>1. Click "Tagihan" filter chip</td>
-      <td>URL: <code>/dashboard?filter=bill.created</code>. Only bill.created shown. Chip highlighted.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">DASH-006</td>
-      <td>Filter "Semua" resets filter</td>
-      <td>Currently filtered by "Belum dibaca"</td>
-      <td>1. Click "Semua" chip</td>
-      <td>URL: <code>/dashboard</code> (no query). All notifications shown. "Semua" chip highlighted.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">DASH-007</td>
-      <td>Mark all notifications as read</td>
-      <td>User has 5 unread notifications</td>
-      <td>1. Click "Tandai semua dibaca" link<br>2. Observe</td>
-      <td>PATCH request sent. Page reloads. All notifications now have read_at set. Unread count = 0.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-</div></div><!-- /Module 2 -->
-
-<!-- ============================================================ -->
-<!-- MODULE 3: GROUPS -->
-<!-- ============================================================ -->
-<div class="module-wrap" id="m3">
-<div class="module-header">
-  <h3 style="margin:0;color:#fff;border:0;padding:0">Module 3: Groups</h3>
-  <span class="mod-num">Routes: 6 &middot; Test Cases: 18</span>
-</div>
-<div class="module-body">
-
-<h4>3.1 Test Scenario: Group Creation</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-001</td>
-      <td>Create group with valid data</td>
-      <td>Authenticated user</td>
-      <td>1. Navigate to <code>/groups</code><br>2. Enter name: "Liburan Bali"<br>3. Enter description: "Trip Agustus"<br>4. Enter target amount: "5000000"<br>5. Click "Simpan grup"</td>
-      <td>Group created. Redirected to <code>/groups/{id}</code>. Creator is admin member. Invite token generated. inviteUrl shown to admin.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-002</td>
-      <td>Create group with empty name</td>
-      <td>Authenticated user on <code>/groups</code></td>
-      <td>1. Leave name blank<br>2. Fill valid description<br>3. Click "Simpan grup"</td>
-      <td>Validation error: "The name field is required." Form preserved with entered data.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-003</td>
-      <td>Create group with negative target amount</td>
-      <td>Authenticated user on <code>/groups</code></td>
-      <td>1. Fill valid name<br>2. Enter target amount: "-1000"<br>3. Click "Simpan grup"</td>
-      <td>Validation error: target_amount must be &ge; 0. Group not created.</td>
-      <td><span class="pill pill-pos">P2</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<h4>3.2 Test Scenario: View Group List</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-004</td>
-      <td>View owned groups list</td>
-      <td>User is member of 3 groups</td>
-      <td>1. Navigate to <code>/groups</code></td>
-      <td>3 group cards shown: name, description, status chip, member count, expense count.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-005</td>
-      <td>View empty groups list</td>
-      <td>New user with no groups</td>
-      <td>1. Navigate to <code>/groups</code></td>
-      <td>"Belum ada grup." message shown. "Buat grup" form visible.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<h4>3.3 Test Scenario: Group Detail &amp; Membership</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-006</td>
-      <td>Member views group detail</td>
-      <td>User is member of group "Liburan Bali"</td>
-      <td>1. Click group card or navigate to <code>/groups/{id}</code></td>
-      <td>Page shows: group name, status, description, member list (name+email+role), expense list, invite link (if admin).</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-007</td>
-      <td>Non-member cannot view group</td>
-      <td>User is NOT a member of the target group</td>
-      <td>1. Navigate directly to <code>/groups/{id}</code></td>
-      <td>HTTP 403 Forbidden. Page not rendered.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<h4>3.4 Test Scenario: Group Joining via Invite Link</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-008</td>
-      <td>Join group with valid invite token</td>
-      <td>Non-member has valid invite link</td>
-      <td>1. Navigate to <code>/groups/{id}/join/{token}</code><br>2. Review group preview<br>3. Click join</td>
-      <td>User added as member (role=member). Redirected to <code>/groups/{id}</code>. Now visible in member list.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-009</td>
-      <td>Join with invalid token returns 404</td>
-      <td>User has tampered invite link</td>
-      <td>1. Navigate to <code>/groups/{id}/join/wrong-token</code></td>
-      <td>HTTP 404 Not Found. Cannot join.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-010</td>
-      <td>Already-a-member sees "already joined"</td>
-      <td>User is already a member of the group</td>
-      <td>1. Navigate to own invite link</td>
-      <td>Preview shows isMember=true. Link to <code>/groups/{id}</code> instead of join.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<h4>3.5 Test Scenario: Member Removal (Kick &amp; Leave)</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-011</td>
-      <td>Admin kicks a member</td>
-      <td>Admin + Member1 in group</td>
-      <td>1. Admin clicks ✕ on Member1<br>2. Confirms dialog</td>
-      <td>Member1 removed. "member.removed" notification sent to Member1. Admin stays.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-012</td>
-      <td>Non-admin cannot kick</td>
-      <td>Admin + Member1 + Member2; Member1 is NOT admin</td>
-      <td>1. Member1 tries to send DELETE request to remove Member2</td>
-      <td>HTTP 403 Forbidden. Member2 NOT removed.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-013</td>
-      <td>Member leaves group</td>
-      <td>Admin + Member; Member wants to leave</td>
-      <td>1. Member clicks ✕ on themselves<br>2. Confirms "Yakin ingin keluar?"</td>
-      <td>Member removed. "member.left" notification sent to remaining members. Redirected to <code>/groups</code>.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-014</td>
-      <td>Last admin promotes oldest member</td>
-      <td>Admin (only admin) + Member1 (older) + Member2 (newer); Admin leaves</td>
-      <td>1. Admin clicks ✕ on themselves</td>
-      <td>Admin removed. Member1 (oldest) promoted to admin. Group not closed.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-015</td>
-      <td>Last member closes group</td>
-      <td>Only 1 admin member in group</td>
-      <td>1. Sole member clicks ✕ on themselves</td>
-      <td>Member removed. Group status auto-changed to "closed".</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-016</td>
-      <td>Non-member (outsider) cannot remove anyone</td>
-      <td>Outsider knows group + member IDs</td>
-      <td>1. Outsider sends DELETE request to <code>/groups/{id}/members/{userId}</code></td>
-      <td>HTTP 403 Forbidden. No changes.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<h4>3.6 Test Scenario: Group Status Changes</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-017</td>
-      <td>Admin changes status to "settled"</td>
-      <td>Admin in active group</td>
-      <td>1. Admin selects "Settled" from status dropdown</td>
-      <td>Status changed. "group.status_changed" notification sent to all members.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">GRP-018</td>
-      <td>Cannot reopen closed group</td>
-      <td>Group status = "closed"</td>
-      <td>1. Admin selects "Active" from dropdown</td>
-      <td>Error: "Grup yang sudah ditutup tidak dapat dibuka kembali." Status remains "closed".</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-</div></div><!-- /Module 3 -->
-
-<!-- ============================================================ -->
-<!-- MODULE 4: PAYMENTS -->
-<!-- ============================================================ -->
-<div class="module-wrap" id="m4">
-<div class="module-header">
-  <h3 style="margin:0;color:#fff;border:0;padding:0">Module 4: Payments</h3>
-  <span class="mod-num">Routes: 4 &middot; Test Cases: 10</span>
-</div>
-<div class="module-body">
-
-<h4>4.1 Test Scenario: View Payment List</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">PAY-001</td>
-      <td>View own payments</td>
-      <td>User has 3 payments across 2 groups</td>
-      <td>1. Navigate to <code>/payments</code></td>
-      <td>All 3 payments shown with: expense title, amount, group name, status, action buttons.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">PAY-002</td>
-      <td>Empty payment list</td>
-      <td>New user has no expenses owing them</td>
-      <td>1. Navigate to <code>/payments</code></td>
-      <td>Empty state message shown. No payment cards.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<h4>4.2 Test Scenario: Submit Payment</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">PAY-003</td>
-      <td>Submit payment with proof (valid state)</td>
-      <td>Payment status = pending; user is the payer</td>
-      <td>1. Click "Bayar" on payment card<br>2. Select payment method: "Transfer"<br>3. Upload proof image<br>4. Submit</td>
-      <td>Payment status = "submitted". paid_at set. Proof stored. "payment.submitted" notification sent to expense payer (admin).</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">PAY-004</td>
-      <td>Re-submit rejected payment</td>
-      <td>Payment status = rejected; user is the payer</td>
-      <td>1. Click "Bayar Ulang"<br>2. Upload new proof<br>3. Submit</td>
-      <td>Status = "submitted". rejection_reason cleared. New proof uploaded.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">PAY-005</td>
-      <td>Submit without proof upload</td>
-      <td>Payment pending; user is payer</td>
-      <td>1. Click "Bayar"<br>2. Select method but skip file<br>3. Submit</td>
-      <td>Validation error: proof file required. Payment stays pending.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">PAY-006</td>
-      <td>Non-owner cannot submit payment</td>
-      <td>Payment belongs to User-B; User-A tries to pay</td>
-      <td>1. User-A sends POST to <code>/payments/{id}/pay</code></td>
-      <td>HTTP 403 Forbidden. Payment unchanged.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<h4>4.3 Test Scenario: Confirm / Reject Payment (Admin)</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">PAY-007</td>
-      <td>Admin confirms submitted payment</td>
-      <td>Group admin; payment status = submitted</td>
-      <td>1. In group detail, click "Confirm" on payment</td>
-      <td>Status = "confirmed". "payment.confirmed" notification sent to payer.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">PAY-008</td>
-      <td>Admin rejects payment with reason</td>
-      <td>Group admin; payment status = submitted</td>
-      <td>1. Click "Reject" on payment<br>2. Enter reason: "Bukti tidak jelas"<br>3. Confirm</td>
-      <td>Status = "rejected". rejection_reason stored. "payment.rejected" notification sent to payer.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">PAY-009</td>
-      <td>Reject without reason</td>
-      <td>Group admin; payment submitted</td>
-      <td>1. Click "Reject"<br>2. Leave reason blank<br>3. Confirm</td>
-      <td>Validation error: "The rejection reason field is required." Payment stays submitted.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">PAY-010</td>
-      <td>Non-admin cannot confirm/reject</td>
-      <td>Regular member tries to confirm</td>
-      <td>1. Member sends PATCH to <code>/payments/{id}/confirm</code></td>
-      <td>HTTP 403 Forbidden. Payment unchanged.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-</div></div><!-- /Module 4 -->
-
-<!-- ============================================================ -->
-<!-- MODULE 5: SETTLEMENTS -->
-<!-- ============================================================ -->
-<div class="module-wrap" id="m5">
-<div class="module-header">
-  <h3 style="margin:0;color:#fff;border:0;padding:0">Module 5: Settlements</h3>
-  <span class="mod-num">Routes: 2 &middot; Test Cases: 6</span>
-</div>
-<div class="module-body">
-
-<h4>5.1 Test Scenario: Settlement Generation &amp; Viewing</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">STL-001</td>
-      <td>Admin generates settlement</td>
-      <td>Group has expenses + confirmed payments; admin logged in</td>
-      <td>1. Navigate to <code>/settlements/{groupId}</code><br>2. Click "Generate Settlement"</td>
-      <td>Settlement created. debt_details shows transfer instructions. "settlement.generated" notification to all members.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">STL-002</td>
-      <td>Member views settlement</td>
-      <td>Settlement exists; user is group member</td>
-      <td>1. Navigate to <code>/settlements/{groupId}</code></td>
-      <td>Shows latest settlement: debtor→creditor transfers with amounts. Group info visible.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">STL-003</td>
-      <td>Non-member cannot view settlement</td>
-      <td>Settlement exists; user NOT in group</td>
-      <td>1. Navigate to <code>/settlements/{groupId}</code></td>
-      <td>HTTP 403 Forbidden.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">STL-004</td>
-      <td>Non-admin cannot generate settlement</td>
-      <td>Regular member in group</td>
-      <td>1. Member sends POST to <code>/settlements/generate/{groupId}</code></td>
-      <td>HTTP 403 Forbidden. No settlement created.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<h4>5.2 Test Scenario: Settlement Calculation Accuracy</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">STL-005</td>
-      <td>Equal split settlement is correct</td>
-      <td>Group of 2: Admin paid 100k expense split equally, Member already paid</td>
-      <td>1. Admin generates settlement<br>2. Read debt_details</td>
-      <td>Member owes Admin 50k. If Member already confirmed payment, net = 0. Transfer list is minimal (no redundant transfers).</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">STL-006</td>
-      <td>Settlement when all debts settled</td>
-      <td>All payments confirmed; no outstanding balances</td>
-      <td>1. Admin generates settlement<br>2. Read debt_details</td>
-      <td>debt_details = empty array []. No transfers needed.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-</div></div><!-- /Module 5 -->
-
-<!-- ============================================================ -->
-<!-- MODULE 6: NOTIFICATIONS -->
-<!-- ============================================================ -->
-<div class="module-wrap" id="m6">
-<div class="module-header">
-  <h3 style="margin:0;color:#fff;border:0;padding:0">Module 6: Notifications</h3>
-  <span class="mod-num">Routes: 4 &middot; Test Cases: 9</span>
-</div>
-<div class="module-body">
-
-<h4>6.1 Test Scenario: Notification List &amp; Filtering</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">NOT-001</td>
-      <td>View paginated notification list</td>
-      <td>User has 20+ notifications</td>
-      <td>1. Navigate to <code>/notifications</code></td>
-      <td>Pagination shown (15 per page). Latest first. Each shows message, type, link button, "Tandai dibaca".</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">NOT-002</td>
-      <td>Filter by unread</td>
-      <td>User has 2 unread + 1 read</td>
-      <td>1. Navigate <code>/notifications?filter=unread</code></td>
-      <td>Only 2 unread shown. Read notification absent.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">NOT-003</td>
-      <td>Filter by type</td>
-      <td>User has 1 bill.created + 2 payment.submitted</td>
-      <td>1. Navigate <code>/notifications?filter=payment.submitted</code></td>
-      <td>Only payment.submitted notifications shown.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<h4>6.2 Test Scenario: Notification Actions</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">NOT-004</td>
-      <td>Mark single notification as read</td>
-      <td>User has 1 unread notification</td>
-      <td>1. Click "Tandai dibaca" on notification card</td>
-      <td>PATCH sent. Notification read_at set. Card opacity reduced. Button disappears.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">NOT-005</td>
-      <td>Mark all as read</td>
-      <td>User has 5 unread notifications</td>
-      <td>1. Click "Tandai semua dibaca"</td>
-      <td>All 5 marked read. Unread count = 0.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">NOT-006</td>
-      <td>Cannot mark another user's notif as read</td>
-      <td>User-A has notification; User-B tries to mark it</td>
-      <td>1. User-B sends PATCH to <code>/notifications/{notifId}/read</code></td>
-      <td>HTTP 403 Forbidden. Notification unchanged.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<h4>6.3 Test Scenario: Bell Badge Counter</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">NOT-007</td>
-      <td>Unread count shown on bell icon</td>
-      <td>User has 3 unread notifications</td>
-      <td>1. Observe header bell icon</td>
-      <td>Red badge shows "3". JSON response from <code>/notifications/unread-count</code> = {"count":3}.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">NOT-008</td>
-      <td>Badge shows "9+" for 10+ unread</td>
-      <td>User has 12 unread notifications</td>
-      <td>1. Observe header bell icon</td>
-      <td>Red badge shows "9+".</td>
-      <td><span class="pill pill-pos">P2</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">NOT-009</td>
-      <td>No badge when 0 unread</td>
-      <td>User has 0 unread notifications</td>
-      <td>1. Observe header bell icon</td>
-      <td>No red badge visible. Bell icon only.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-</div></div><!-- /Module 6 -->
-
-<!-- ============================================================ -->
-<!-- MODULE 7: SETTINGS & PROFILE -->
-<!-- ============================================================ -->
-<div class="module-wrap" id="m7">
-<div class="module-header">
-  <h3 style="margin:0;color:#fff;border:0;padding:0">Module 7: Settings &amp; Profile</h3>
-  <span class="mod-num">Routes: 5 &middot; Test Cases: 9</span>
-</div>
-<div class="module-body">
-
-<h4>7.1 Test Scenario: Profile Management</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">SET-001</td>
-      <td>Update profile name</td>
-      <td>Logged in user</td>
-      <td>1. Navigate to <code>/settings/profile</code><br>2. Change name to "Budi Update"<br>3. Click save</td>
-      <td>Name updated. Toast: "Profile updated."</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">SET-002</td>
-      <td>Update email</td>
-      <td>Logged in user</td>
-      <td>1. Change email to "newemail@test.com"<br>2. Save</td>
-      <td>Email updated. email_verified_at set to null (requires re-verification).</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">SET-003</td>
-      <td>Delete account</td>
-      <td>Logged in user</td>
-      <td>1. Click "Delete Account"<br>2. Confirm</td>
-      <td>User deleted. Session invalidated. Redirected to <code>/</code>.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<h4>7.2 Test Scenario: Security (Password)</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">SET-004</td>
-      <td>Change password successfully</td>
-      <td>Logged in user; knows current password</td>
-      <td>1. Navigate to <code>/settings/security</code><br>2. Enter current password<br>3. Enter new password + confirm<br>4. Save</td>
-      <td>Password changed. Toast: "Password updated."</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">SET-005</td>
-      <td>Wrong current password</td>
-      <td>Logged in user</td>
-      <td>1. Enter wrong current password<br>2. Enter valid new password<br>3. Save</td>
-      <td>Error: "The provided password does not match your current password." Password unchanged.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">SET-006</td>
-      <td>Password rate limiting (6/min)</td>
-      <td>User on security page</td>
-      <td>1. Attempt 6+ password changes in &lt;60s</td>
-      <td>Throttled. Must wait before next attempt.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<h4>7.3 Test Scenario: Appearance Settings</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">SET-007</td>
-      <td>View appearance page</td>
-      <td>Logged in user</td>
-      <td>1. Navigate to <code>/settings/appearance</code></td>
-      <td>Appearance settings page rendered. Theme toggle available.</td>
-      <td><span class="pill pill-pos">P2</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">SET-008</td>
-      <td>Toggle dark/light mode</td>
-      <td>On appearance page</td>
-      <td>1. Toggle theme switch</td>
-      <td>Theme persists across pages. Setting saved to user preference.</td>
-      <td><span class="pill pill-pos">P2</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">SET-009</td>
-      <td>Guest cannot access settings</td>
-      <td>Not logged in</td>
-      <td>1. Navigate to <code>/settings/profile</code></td>
-      <td>Redirected to <code>/login</code>.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-</div></div><!-- /Module 7 -->
-
-<!-- ============================================================ -->
-<!-- MODULE 8: ADMIN PANEL -->
-<!-- ============================================================ -->
-<div class="module-wrap" id="m8">
-<div class="module-header">
-  <h3 style="margin:0;color:#fff;border:0;padding:0">Module 8: Admin Panel</h3>
-  <span class="mod-num">Routes: 4 &middot; Test Cases: 8</span>
-</div>
-<div class="module-body">
-
-<h4>8.1 Test Scenario: Access Control</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">ADM-001</td>
-      <td>System admin accesses admin panel</td>
-      <td>Logged in as admin@test.com (system_admin)</td>
-      <td>1. Navigate to <code>/admin/stats</code></td>
-      <td>Admin stats page rendered with platform-wide metrics. Navigation shows admin menu items.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">ADM-002</td>
-      <td>Regular user cannot access admin</td>
-      <td>Logged in as regular user (role=user)</td>
-      <td>1. Navigate to <code>/admin/users</code></td>
-      <td>HTTP 403 Forbidden.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">ADM-003</td>
-      <td>Guest cannot access admin</td>
-      <td>Not logged in</td>
-      <td>1. Navigate to <code>/admin/users</code></td>
-      <td>Redirected to <code>/login</code>.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<h4>8.2 Test Scenario: User Management</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">ADM-004</td>
-      <td>View all users</td>
-      <td>System admin; 5+ users exist</td>
-      <td>1. Navigate to <code>/admin/users</code></td>
-      <td>Paginated user list (20/page). Shows: id, name, email, role, is_active, created_at. Summary: total, active, inactive, admin counts.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">ADM-005</td>
-      <td>Deactivate user</td>
-      <td>System admin; target user is_active=true</td>
-      <td>1. Find user in list<br>2. Click toggle/deactivate button</td>
-      <td>User is_active = false. Affected user cannot access any auth page (redirected to login).</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">ADM-006</td>
-      <td>Admin cannot deactivate themselves</td>
-      <td>System admin tries to toggle own status</td>
-      <td>1. Attempt to PATCH own <code>/admin/users/{selfId}/status</code></td>
-      <td>HTTP 422 Unprocessable. Own status unchanged.</td>
-      <td><span class="pill pill-mid">P1</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<h4>8.3 Test Scenario: Group Monitoring &amp; Platform Stats</h4>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th style="width:80px">Case ID</th><th style="width:140px">Scenario</th><th>Precondition</th><th>Test Steps</th><th>Expected Result</th><th style="width:70px">Priority</th></tr>
-  </thead>
-  <tbody>
-    <tr class="tc-row">
-      <td class="tc-id">ADM-007</td>
-      <td>View all groups (monitoring)</td>
-      <td>System admin; 3+ groups exist</td>
-      <td>1. Navigate to <code>/admin/groups</code></td>
-      <td>Paginated group list (20/page). Shows: name, creator, member/expense/settlement counts, status. Summary: total, active, settled, closed counts.</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-    <tr class="tc-row">
-      <td class="tc-id">ADM-008</td>
-      <td>View platform stats (aggregate)</td>
-      <td>System admin</td>
-      <td>1. Navigate to <code>/admin/stats</code></td>
-      <td>Dashboard shows: user counts, group counts by status, total expenses value, payment stats. Expense titles NOT visible (privacy).</td>
-      <td><span class="pill pill-neg">P0</span></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-</div></div><!-- /Module 8 -->
-
-<!-- ============================================================ -->
-<!-- APPENDIX: TRACEABILITY MATRIX -->
-<!-- ============================================================ -->
-<h2 id="appendix">Appendix A: Requirements Traceability Matrix</h2>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th>Req ID</th><th>Requirement</th><th>Test Cases</th><th>Status</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>REQ-AUTH-01</td><td>User registration with validation</td><td>AUTH-001..005</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-AUTH-02</td><td>User login / logout / session</td><td>AUTH-006..012</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-DASH-01</td><td>Dashboard with summary stats</td><td>DASH-001..003</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-DASH-02</td><td>Notification filtering on dashboard</td><td>DASH-004..007</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-GRP-01</td><td>Group CRUD: create, list, view</td><td>GRP-001..007</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-GRP-02</td><td>Group join via invite token</td><td>GRP-008..010</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-GRP-03</td><td>Member removal: kick + leave + auto-promote + auto-close</td><td>GRP-011..016</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-GRP-04</td><td>Group status changes</td><td>GRP-017..018</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-PAY-01</td><td>Payment list + submit + re-submit</td><td>PAY-001..006</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-PAY-02</td><td>Admin confirm / reject payments</td><td>PAY-007..010</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-STL-01</td><td>Settlement generation + viewing</td><td>STL-001..004</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-STL-02</td><td>Settlement calculation accuracy</td><td>STL-005..006</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-NOT-01</td><td>Notification list + filter + pagination</td><td>NOT-001..003</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-NOT-02</td><td>Mark read + mark all read</td><td>NOT-004..006</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-NOT-03</td><td>Bell badge with polling (30s)</td><td>NOT-007..009</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-SET-01</td><td>Profile update + delete account</td><td>SET-001..003</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-SET-02</td><td>Password change + security</td><td>SET-004..006</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-SET-03</td><td>Appearance + guest guard</td><td>SET-007..009</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-ADM-01</td><td>Admin access control (roles)</td><td>ADM-001..003</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-ADM-02</td><td>User management (list + deactivate)</td><td>ADM-004..006</td><td><span class="pill pill-pos">Covered</span></td></tr>
-    <tr><td>REQ-ADM-03</td><td>Group monitoring + platform stats</td><td>ADM-007..008</td><td><span class="pill pill-pos">Covered</span></td></tr>
-  </tbody>
-</table>
-</div>
-
-<!-- ============================================================ -->
-<!-- APPENDIX B -->
-<!-- ============================================================ -->
-<h2 id="appendix-b">Appendix B: Test Execution Log</h2>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th>Date</th><th>Tester</th><th>Module</th><th>Passed</th><th>Failed</th><th>Blocked</th><th>Notes</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>To be filled during test execution</td></tr>
-  </tbody>
-</table>
-</div>
-
-<p style="text-align:center; margin-top:48px; color:var(--slate); font-size:13px">
-  &copy; 2026 Dompet Patungan &middot; Blackbox Testing Documentation v1.0 &middot; ISO/IEC 25010:2023
-</p>
-
-</div><!-- /.page -->
 </body>
 </html>
